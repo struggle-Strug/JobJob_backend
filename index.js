@@ -5,6 +5,7 @@ const dotenv = require("dotenv");
 const { globSync } = require("glob");
 const path = require("path");
 const mongoose = require("mongoose");
+const passport = require("passport");
 
 dotenv.config();
 
@@ -26,6 +27,8 @@ mongoose.connect(process.env.MONGO_URI, {
 .then(() => console.log("Connected to MongoDB"))
 .catch((err) => console.log(err));
 
+// Passport
+app.use(passport.initialize());
 
 const routes = new globSync("./Routers/*Router.js");
 

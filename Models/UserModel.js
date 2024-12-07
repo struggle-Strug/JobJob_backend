@@ -27,19 +27,15 @@ const userSchema = new mongoose.Schema({
     },
     jobType: {
         type: Array,
-        required: true,
     },  
-    employmenType: {
+    employmentType: {
         type: Array,
-        required: true,
     },
     qualification: {
         type: Array,
-        required: true,
     },
     feature: {
         type: Array,
-        required: true,
     },
     prefecture: {
         type: String,
