@@ -1,7 +1,6 @@
 const User = require("../../Models/UserModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const config = require("../../config/config");
 
 exports.register =  async(req, res) => {
     try{
@@ -28,10 +27,19 @@ exports.login = async (req, res) => {
         const isMatch = await bcrypt.compare(req.body.password, user.password);
         if(!isMatch) return res.status(401).json({ message: "パスワードが間違っています。", error: true });
 
-        const token = jwt.sign({ id: user._id }, config.secret, { expiresIn: "30d" });
-        return res.status(200).json({ message: "ログイン成功!", token: `JWT ${token}` });
+        const token = jwt.sign({ id: user._id }, process.env.SECRET, { expiresIn: "30d" });
+        return res.status(200).json({ message: "ログイン成功!", token: `JWT ${token}`, user: user });
     } catch (error) {
         return res.status(500).json({ message: "Internal server error", error: true });
     }
 }
+
+exports.tokenlogin = async (req, res) => {
+    try {
+      const token = jwt.sign({ id: req.user._id }, process.env.SECRET, { expiresIn: "30d" });
+      return res.status(200).json({ message: "ログイン成功!", token: `JWT ${token}`, user: req.user });
+    } catch (err) {
+      res.status(400).json({ message: err.message });
+    }
+  };
 
