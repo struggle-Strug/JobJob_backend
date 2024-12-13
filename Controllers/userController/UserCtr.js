@@ -42,5 +42,14 @@ exports.tokenlogin = async (req, res) => {
     } catch (err) {
       res.status(400).json({ message: err.message });
     }
-  };
+};
+
+exports.update = async (req, res) => {
+    try {
+        const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        return res.status(200).json({ message: "更新成功!", user: user });
+    } catch (error) {
+        return res.status(500).json({ message: "Internal server error", error: true });
+    }
+}
 
