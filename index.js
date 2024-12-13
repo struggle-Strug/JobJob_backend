@@ -19,6 +19,10 @@ app.use(cors({ origin: "*" }));
 app.use(bodyParser.json({ limit: "5mb" })); // Send JSON responses
 app.use(bodyParser.urlencoded({ extended: false, limit: "5mb" })); // Parses urlencoded bodies
 
+// Serve static files from the 'uploads' directory
+app.use('/uploads', express.static('uploads'));
+
+
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI, {
     useNewUrlParser: true,

@@ -35,11 +35,22 @@ const userSchema = new mongoose.Schema({
     employmentType: {
         type: Array,
     },
-    qualification: {
-        type: Array,
-    },
+    qualification: [{
+        qualification: { type: String, required: true },
+        year: { type: Number },
+        month: { type: Number },
+    }],
     feature: {
         type: Array,
+    },
+    dependents: {
+        type: Number,
+    },
+    spouse: {
+        type: String,
+    },
+    selfPR: {
+        type: String,
     },
     prefecture: {
         type: String,
