@@ -15,6 +15,7 @@ exports.register =  async(req, res) => {
         await newUser.save();
         return res.status(201).json({ message: "登録成功!", user: newUser });
     } catch (error) {
+        console.log(error);
         return res.status(500).json({ message: "Internal server error", error: true });
     }
 }
