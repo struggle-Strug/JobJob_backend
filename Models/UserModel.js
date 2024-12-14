@@ -14,7 +14,7 @@ const userSchema = new mongoose.Schema({
         required: true,
     },
     birthday: {
-        type: Date,
+        type: String,
         required: true,
     },
     email: {
@@ -57,6 +57,24 @@ const userSchema = new mongoose.Schema({
         required: true,
     },
     photo: {
+        type: String,
+    },
+    lastEducation: {
+        type: String,
+    },
+    schoolName: {
+        type: String,
+    },
+    department: {
+        type: String,
+    },
+    major: {
+        type: String,
+    },
+    graduation: {
+        type: String,
+    },
+    graduationDate: {
         type: String,
     },
 });
