@@ -29,11 +29,24 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    jobType: {
-        type: Array,
-    },  
+    jobType: [
+        {
+            type: {
+                type: String
+            },
+            period: {
+                type: String
+            },
+        }
+    ],  
     employmentType: {
         type: Array,
+    },
+    employmentDate: {
+        type: String,
+    },
+    desireYearSalary: {
+        type: String,
     },
     qualification: [{
         qualification: { type: String, required: true },
@@ -52,10 +65,11 @@ const userSchema = new mongoose.Schema({
     selfPR: {
         type: String,
     },
-    prefecture: {
-        type: String,
-        required: true,
-    },
+    prefecture: [
+        {
+            type: String,
+        }
+    ],
     photo: {
         type: String,
     },
@@ -77,6 +91,43 @@ const userSchema = new mongoose.Schema({
     graduationDate: {
         type: String,
     },
+    workHistories: [
+        {
+            companyName: {
+                type: String,
+            },
+            contents: {
+                type: String,
+            },
+            startDate: {
+                type: String,
+            },
+            endDate: {
+                type: String,
+            },
+            employmentType: {
+                type: String,
+            },
+            jobType: {
+                type: String,
+            },
+            jobTypeDetail: {
+                type: String,
+            },
+            workContent: {
+                type: String,
+            },
+            officialPosition: {
+                type: String,
+            },
+            payType: {
+                type: String,
+            },
+            amount: {
+                type: String,
+            }
+        }
+    ]
 });
 
 module.exports = mongoose.model("User", userSchema);
