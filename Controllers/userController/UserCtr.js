@@ -15,7 +15,6 @@ exports.register =  async(req, res) => {
         await newUser.save();
         return res.status(201).json({ message: "登録成功!", user: newUser });
     } catch (error) {
-        console.log(error);
         return res.status(500).json({ message: "Internal server error", error: true });
     }
 }
@@ -47,6 +46,33 @@ exports.tokenlogin = async (req, res) => {
 exports.update = async (req, res) => {
     try {
         const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        return res.status(200).json({ message: "更新成功!", user: user });
+    } catch (error) {
+        return res.status(500).json({ message: "Internal server error", error: true });
+    }
+}
+
+exports.updateWork = async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+        user.workHistories = await req.body;
+        await user.save();
+        return res.status(200).json({ message: "更新成功!", user: user });
+    } catch (error) {
+        return res.status(500).json({ message: "Internal server error", error: true });
+    }
+}
+
+exports.updateDesire = async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+        user.jobType = req.body.jobTypes;
+        user.prefecture = req.body.prefectures;
+        user.employmentType = req.body.employmentType;
+        user.employmentDate = req.body.employmentDate;
+        user.desireYearSalary = req.body.yearSalary;
+        user.feature = req.body.asks;
+        await user.save();
         return res.status(200).json({ message: "更新成功!", user: user });
     } catch (error) {
         return res.status(500).json({ message: "Internal server error", error: true });
