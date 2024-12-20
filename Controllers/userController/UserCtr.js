@@ -67,7 +67,7 @@ exports.updateDesire = async (req, res) => {
     try {
         const user = await User.findById(req.params.id);
         user.jobType = req.body.jobTypes;
-        user.prefecture = req.body.prefectures;
+        user.desirePrefecture = req.body.prefectures;
         user.employmentType = req.body.employmentType;
         user.employmentDate = req.body.employmentDate;
         user.desireYearSalary = req.body.yearSalary;
