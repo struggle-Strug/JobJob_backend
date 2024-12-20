@@ -5,7 +5,7 @@ const rirekiCtr = require("../Controllers/rirekiController/rirekiCtr");
 
 
 router.post("/", requireAuth, rirekiCtr.create)
-router.post("/:id/update", requireAuth, rirekiCtr.update)
+router.post("/update/basic/:id", requireAuth, rirekiCtr.update)
 router.get("/:id", requireAuth, rirekiCtr.getRireki)
 router.get("/all/:id", requireAuth, rirekiCtr.getAllRirekis)
 
