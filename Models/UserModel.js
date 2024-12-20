@@ -65,11 +65,12 @@ const userSchema = new mongoose.Schema({
     selfPR: {
         type: String,
     },
-    prefecture: [
-        {
-            type: String,
-        }
-    ],
+    prefecture: {
+        type: String,
+    },
+    desirePrefecture: [{
+        type: String,
+    }],
     photo: {
         type: String,
     },
