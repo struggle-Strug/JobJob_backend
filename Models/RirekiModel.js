@@ -58,6 +58,12 @@ const RirekiSchema = new mongoose.Schema({
             graduationDate: {
                 type: String,
             },
+            admission: {
+                type: String,
+            },
+            graduation: {
+                type: String,
+            },
         }
     ],
     workhistory: [

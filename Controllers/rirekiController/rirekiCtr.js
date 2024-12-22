@@ -39,9 +39,22 @@ exports.getAllRirekis = async (req, res) => {
     }
 }
 
-exports.update = async (req, res) => {
+exports.updateBasic = async (req, res) => {
     try {
-        const rireki = await Rireki.findByIdAndUpdate(req.params.id, req.body);
+        const rireki = await Rireki.findById(req.params.id);
+        rireki.basic = req.body;
+        await rireki.save();
+        return res.status(200).json({ message: "履歴書更新成功!", rireki: rireki });
+    } catch (error) {
+        return res.status(500).json({ message: "Internal server error", error: true });
+    }
+}
+
+exports.updateEdu = async (req, res) => {
+    try {
+        const rireki = await Rireki.findById(req.params.id);
+        rireki.education = req.body;
+        await rireki.save();
         return res.status(200).json({ message: "履歴書更新成功!", rireki: rireki });
     } catch (error) {
         return res.status(500).json({ message: "Internal server error", error: true });
