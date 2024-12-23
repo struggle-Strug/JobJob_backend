@@ -8,6 +8,7 @@ router.post("/", requireAuth, rirekiCtr.create)
 router.post("/update/basic/:id", requireAuth, rirekiCtr.updateBasic)
 router.post("/update/education/:id", requireAuth, rirekiCtr.updateEdu)
 router.post("/update/work_history/:id", requireAuth, rirekiCtr.updateWorkHistory)
+router.post("/update/qualification/:id", requireAuth, rirekiCtr.updateQualification)
 router.get("/:id", requireAuth, rirekiCtr.getRireki)
 router.get("/all/:id", requireAuth, rirekiCtr.getAllRirekis)
 

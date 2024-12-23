@@ -71,3 +71,14 @@ exports.updateWorkHistory = async (req, res) => {
         return res.status(500).json({ message: "Internal server error", error: true });
     }
 }
+
+exports.updateQualification = async (req, res) => {
+    try {
+        const rireki = await Rireki.findById(req.params.id);
+        rireki.qualification = req.body;
+        await rireki.save();
+        return res.status(200).json({ message: "履歴書更新成功!", rireki: rireki });
+    } catch (error) {
+        return res.status(500).json({ message: "Internal server error", error: true });
+    }
+}
