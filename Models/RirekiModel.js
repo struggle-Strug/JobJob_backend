@@ -49,9 +49,9 @@ const RirekiSchema = new mongoose.Schema({
             schoolName_department_major: {
                 type: String,
             },
-            notes: {
+            notes: [{
                 type: String,
-            },
+            }],
             admissionDate: {
                 type: String,
             },
@@ -71,13 +71,16 @@ const RirekiSchema = new mongoose.Schema({
             companyName: {
                 type: String,
             },
-            notes: {
+            notes: [{
                 type: String,
-            },
+            }],
             startDate: {
                 type: String,
             },
             endDate: {
+                type: String,
+            },
+            endStatus: {
                 type: String,
             },
             resignationReason: {
