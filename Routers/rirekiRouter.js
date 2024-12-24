@@ -11,6 +11,7 @@ router.post("/update/work_history/:id", requireAuth, rirekiCtr.updateWorkHistory
 router.post("/update/qualification/:id", requireAuth, rirekiCtr.updateQualification)
 router.post("/update/other/:id", requireAuth, rirekiCtr.updateOther)
 router.post("/update/desire/:id", requireAuth, rirekiCtr.updateDesire)
+router.post("/update/date/:id", requireAuth, rirekiCtr.updateDate)
 router.get("/:id", requireAuth, rirekiCtr.getRireki)
 router.get("/all/:id", requireAuth, rirekiCtr.getAllRirekis)
 
