@@ -105,7 +105,7 @@ const RirekiSchema = new mongoose.Schema({
         },
     },
     desire: {
-        applyreason: {
+        applyReason: {
             type: String,
         },
         hope: {
