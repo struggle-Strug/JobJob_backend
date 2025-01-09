@@ -14,6 +14,7 @@ router.post("/update/other/:id", requireAuth, rirekiCtr.updateOther)
 router.post("/update/desire/:id", requireAuth, rirekiCtr.updateDesire)
 router.post("/update/date/:id", requireAuth, rirekiCtr.updateDate)
 router.get("/:id", requireAuth, rirekiCtr.getRireki)
+router.post("/delete/:id", requireAuth, rirekiCtr.deleteRireki)
 router.get("/all/:id", requireAuth, rirekiCtr.getAllRirekis)
 
 module.exports = router;

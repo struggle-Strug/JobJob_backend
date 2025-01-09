@@ -12,15 +12,12 @@ const CareerSchema = new mongoose.Schema({
     },
     name: {
         type: String,
-        required: true
     },
     creationDate: {
         type: String,
-        required: true
     },
     selfPR: {
         type: String,
-        required: true
     },
     qualification: [{
         qualification: { type: String, required: true },
@@ -31,35 +28,27 @@ const CareerSchema = new mongoose.Schema({
         {
             companyName: {
                 type: String,
-                required: true
             },
             contents: {
                     type: String,
-                    required: true
             },
             startDate: {
                 type: Date,
-                required: true
             },
             endDate: {
                 type: Date,
-                required: true
             },
             employmentType: {
                 type: String,
-                required: true
             },
             jobTypeDetail: {
                 type: String,
-                required: true
             },
             workContent: {
                 type: String,
-                required: true
             },
             officialPosition: {
                 type: String,
-                required: true
             }
         }
     ]
