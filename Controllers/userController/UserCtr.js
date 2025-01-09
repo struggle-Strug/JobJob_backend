@@ -15,7 +15,7 @@ exports.register =  async(req, res) => {
         await newUser.save();
         return res.status(201).json({ message: "登録成功!", user: newUser });
     } catch (error) {
-        return res.status(500).json({ message: "Internal server error", error: true });
+        return res.status(500).json({ message: "サーバーエラー", error: true });
     }
 }
 
@@ -30,7 +30,7 @@ exports.login = async (req, res) => {
         const token = jwt.sign({ id: user._id }, process.env.SECRET, { expiresIn: "30d" });
         return res.status(200).json({ message: "ログイン成功!", token: `JWT ${token}`, user: user });
     } catch (error) {
-        return res.status(500).json({ message: "Internal server error", error: true });
+        return res.status(500).json({ message: "サーバーエラー", error: true });
     }
 }
 
@@ -48,7 +48,7 @@ exports.update = async (req, res) => {
         const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true });
         return res.status(200).json({ message: "更新成功!", user: user });
     } catch (error) {
-        return res.status(500).json({ message: "Internal server error", error: true });
+        return res.status(500).json({ message: "サーバーエラー", error: true });
     }
 }
 
@@ -59,7 +59,7 @@ exports.updateWork = async (req, res) => {
         await user.save();
         return res.status(200).json({ message: "更新成功!", user: user });
     } catch (error) {
-        return res.status(500).json({ message: "Internal server error", error: true });
+        return res.status(500).json({ message: "サーバーエラー", error: true });
     }
 }
 
@@ -75,7 +75,16 @@ exports.updateDesire = async (req, res) => {
         await user.save();
         return res.status(200).json({ message: "更新成功!", user: user });
     } catch (error) {
-        return res.status(500).json({ message: "Internal server error", error: true });
+        return res.status(500).json({ message: "サーバーエラー", error: true });
+    }
+}
+
+exports.deleteAccount = async (req, res) => {
+    try {
+        const user = await User.findByIdAndDelete(req.params.id);
+        return res.status(200).json({ message: "削除成功!", user: user });
+    } catch (error) {
+        return res.status(500).json({ message: "サーバーエラー", error: true });
     }
 }
 
