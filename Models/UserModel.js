@@ -128,7 +128,25 @@ const userSchema = new mongoose.Schema({
                 type: String,
             }
         }
-    ]
+    ],
+    setting: {
+        notificationEmail: {
+            type: Boolean,
+            default: true, // Default value set to true
+        },
+        message: {
+            type: Boolean,
+            default: true, // Default value set to true
+        },
+        newJob: {
+            type: Boolean,
+            default: true, // Default value set to true
+        },
+        recommendJob: {
+            type: Boolean,
+            default: true, // Default value set to true
+        },
+    }
 });
 
 module.exports = mongoose.model("User", userSchema);

@@ -27,7 +27,7 @@ exports.getOne = async (req, res) => {
         const careerSheet = await Career.findById(id);
         res.status(200).json({ message: "職務経歴書読み込み成功", careerSheet: careerSheet });
     } catch (error) {
-        res.status(500).json({ message: "職務経歴書読み込み失敗", error });
+        res.status(500).json({ message: "サーバーエラー", error });
     }
 }
 
@@ -38,7 +38,17 @@ exports.update = async (req, res) => {
         const careerSheet = await Career.findByIdAndUpdate(id, { user, title, name, creationDate, selfPR, qualification, workHistories });
         res.status(200).json({ message: "職務経歴書更新成功", careerSheet });
     } catch (error) {
-        res.status(500).json({ message: "職務経歴書更新失敗", error });
+        res.status(500).json({ message: "サーバーエラー", error });
+    }
+}
+
+exports.deleteCareer = async (req, res) => {
+    try {
+        const career = await Career.findOne({ user: req.params.id});
+        await career.deleteOne();
+        return res.status(200).json({ message: "削除成功!", career: career });
+    } catch (error) {
+        return res.status(500).json({ message: "サーバーエラー", error: true });
     }
 }
 
