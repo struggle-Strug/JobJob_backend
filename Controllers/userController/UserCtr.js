@@ -22,10 +22,10 @@ exports.register =  async(req, res) => {
 exports.login = async (req, res) => {
     try{
         const user = await User.findOne({ email: req.body.email });
-        if(!user) return res.status(401).json({ message: "ユーザーが見つかりません。", error: true });
+        if(!user) return res.json({ message: "ユーザーが見つかりません。", error: true });
 
         const isMatch = await bcrypt.compare(req.body.password, user.password);
-        if(!isMatch) return res.status(401).json({ message: "パスワードが間違っています。", error: true });
+        if(!isMatch) return res.json({ message: "パスワードが間違っています。", error: true });
 
         const token = jwt.sign({ id: user._id }, process.env.SECRET, { expiresIn: "30d" });
         return res.status(200).json({ message: "ログイン成功!", token: `JWT ${token}`, user: user });
