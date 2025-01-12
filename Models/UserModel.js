@@ -146,6 +146,10 @@ const userSchema = new mongoose.Schema({
             type: Boolean,
             default: true, // Default value set to true
         },
+    },
+    role: {
+        type: String,
+        default: "member",
     }
 });
 
