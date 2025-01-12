@@ -1,6 +1,7 @@
 const JwtStrategy = require("passport-jwt").Strategy;
 const ExtractJwt = require("passport-jwt").ExtractJwt;
 const User = require("../Models/UserModel");
+const Customer = require("../Models/Customer");
 const passport = require("passport");
 
 // Setting JWT strategy options
@@ -15,8 +16,9 @@ const jwtOptions = {
 const jwtLogin = new JwtStrategy(jwtOptions, async (payload, done) => {
   try {
     const user = await User.findById(payload.id);
-    if (user) {
-      return done(null, user);
+    const customer = await Customer.findById(payload.id);
+    if (user || customer) {
+      return done(null, user || customer);
     }
     return done(null, false);
   } catch (err) {
