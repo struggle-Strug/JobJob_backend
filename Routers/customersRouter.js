@@ -3,4 +3,5 @@ const customersController = require("../Controllers/customersController");
 
 router.post("/signup", customersController.signup);
 router.post("/signin", customersController.signin);
+router.get("/tokenlogin", customersController.tokenlogin);
 module.exports = router;

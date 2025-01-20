@@ -6,11 +6,11 @@ const customerSchema = new mongoose.Schema({
     contactPerson: {type: String, required: true},
     huriganaContactPerson: {type: String, required: true},
     phoneNumber: {type: String, required: true},
-    email: {type: String, required: true},
+    email: { type: String, required: true },
+    password: { type: String },
+    role: {type: String, default: "customer"},
     allowed: {type: Boolean, default: false},
     createdAt: {type: Date, default: Date.now}
 })
 
-const Customer = mongoose.model("Customer", customerSchema);
-
-module.exports = Customer;
+module.exports = mongoose.model("Customer", customerSchema);
