@@ -1,10 +1,14 @@
 const mongoose = require("mongoose");
 
 const FacilitySchema = new mongoose.Schema({
-    user_id: {
+    customer_id: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
+        ref: "Customer",
         required: true,
+    },
+    facility_id: {
+        type: String,
+        required: true
     },
     name: {
         type: String,
@@ -57,6 +61,13 @@ const FacilitySchema = new mongoose.Schema({
     },
     rest_day: {
         type: String,
+    },
+    allowed: {
+        type: Boolean,
+        default: false
+    },
+    registrationDate: {
+        type: Date,
     },
     created_at: {
         type: Date,

@@ -6,6 +6,10 @@ const JobPostSchema = new mongoose.Schema({
         ref: 'Facility',
         required: true,
     },
+    jobpost_id: {
+        type: String,
+        required: true
+    },
     type: {
         type: String,
         required: true,
@@ -99,6 +103,10 @@ const JobPostSchema = new mongoose.Schema({
     process: {
         type: String,
         required: true
+    },
+    allowed: {
+        type: Boolean,
+        default: false
     },
     created_at: {
         type: Date,
