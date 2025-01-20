@@ -41,7 +41,7 @@ exports.getFacilities = async (req, res) => {
 
 exports.getAllFacilities = async (req, res) => {
     try {
-        const facilities = await FacilityModel.find().populate('customer_id');
+        const facilities = await FacilityModel.find().populate('customer_id').sort({ createdAt: -1 });
         res.status(200).json({ message: "施設取得成功", facility: facilities });
     } catch (error) {
         res.status(500).json({ message: "サーバーエラー", error: true });
@@ -61,6 +61,7 @@ exports.allowFacility = async (req, res) => {
     try {
         const facility = await FacilityModel.findById(req.params.id);
         facility.allowed = true;
+        facility.registrationDate = new Date();
         await facility.save();
         res.status(200).json({ message: "施設承認成功", facility: facility });
     } catch (error) {
