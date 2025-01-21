@@ -60,7 +60,7 @@ exports.getFacility = async (req, res) => {
 exports.allowFacility = async (req, res) => {
     try {
         const facility = await FacilityModel.findById(req.params.id);
-        facility.allowed = true;
+        facility.allowed = "allowed";
         facility.registrationDate = new Date();
         await facility.save();
         res.status(200).json({ message: "施設承認成功", facility: facility });
