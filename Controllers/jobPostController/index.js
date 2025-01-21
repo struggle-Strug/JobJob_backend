@@ -2,9 +2,12 @@ const JobPostModel = require("../../Models/JobPostModel")
 
 exports.createJobPost = async (req, res) => {
     try {
+        const jobposts = await JobPostModel.find({});
         const newJobPost = new JobPostModel({
             name: req.body.name,
             facility_id: req.body.facility_id,
+            customer_id: req.user._id,
+            jobpost_id: jobposts.length + 1,
             type: req.body.type,
             picture: req.body.picture,
             sub_title: req.body.sub_title,
@@ -32,19 +35,41 @@ exports.createJobPost = async (req, res) => {
             qualification_content: req.body.qualification_content,
             qualification_welcome: req.body.qualification_welcome,
             process: req.body.process,
+            registered_at: "",
     })
 
     await newJobPost.save();
     res.status(200).json({ message: "求人を登録しました", jobpost: newJobPost });
     } catch (error) {
+        console.log(error)
+        res.status(500).json({ message: "サーバーエラー", error: true });
+    }
+}
+
+exports.getJobPost = async (req, res) => {
+    try {
+        const jobPost = await JobPostModel.find({ facility_id: req.params.id }).populate("customer_id");
+        res.status(200).json({ jobpost: jobPost });
+    } catch (error) {
+        console.log(error);
         res.status(500).json({ message: "サーバーエラー", error: true });
     }
 }
 
 exports.getJobPosts = async (req, res) => {
     try {
-        const jobPosts = await JobPostModel.find({ facility_id: req.params.id });
-        res.status(200).json({ jobpost: jobPosts });
+        const jobPosts = await JobPostModel.find({}).populate("customer_id").populate("facility_id").sort({ created_at: -1 });
+        res.status(200).json({ jobposts: jobPosts });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "サーバーエラー", error: true });
+    }
+}
+
+exports.allowJobPost = async (req, res) => {
+    try {
+        const jobPost = await JobPostModel.findByIdAndUpdate(req.params.id, { allowed: "allowed", registered_at: new Date() });
+        res.status(200).json({ message: "求人を許可しました", jobpost: jobPost });
     } catch (error) {
         console.log(error);
         res.status(500).json({ message: "サーバーエラー", error: true });
