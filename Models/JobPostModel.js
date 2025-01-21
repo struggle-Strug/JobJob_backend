@@ -6,6 +6,11 @@ const JobPostSchema = new mongoose.Schema({
         ref: 'Facility',
         required: true,
     },
+    customer_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Customer',
+        required: true,
+    },
     jobpost_id: {
         type: String,
         required: true
@@ -105,8 +110,12 @@ const JobPostSchema = new mongoose.Schema({
         required: true
     },
     allowed: {
-        type: Boolean,
-        default: false
+        type: String,
+        default: "pending"
+    },
+    registered_at: {
+        type: Date,
+        default: Date.now,
     },
     created_at: {
         type: Date,
