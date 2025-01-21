@@ -63,8 +63,8 @@ const FacilitySchema = new mongoose.Schema({
         type: String,
     },
     allowed: {
-        type: Boolean,
-        default: false
+        type: String,
+        default: "pending"
     },
     registrationDate: {
         type: Date,
