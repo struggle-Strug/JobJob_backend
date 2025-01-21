@@ -1,16 +1,22 @@
 const Customer = require("../../Models/CustomerModel");
+const Facility = require("../../Models/FacilityModel");
+const JobPost = require("../../Models/JobPostModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 exports.signup = async (req, res) => {
     try {
+        const customers = await Customer.find();
+        const customer_id = customers.length + 1;
         const newCustomer = new Customer({
+            customer_id: customer_id,
             companyName: req.body.companyName,
             huriganaCompanyName: req.body.huriganaCompanyName,
             contactPerson: req.body.contactPerson,
             huriganaContactPerson: req.body.huriganaContactPerson,
             phoneNumber: req.body.phoneNumber,
             email: req.body.email,
-            password: ""
+            password: "",
+            registrationDate: ""
         });
         await newCustomer.save();
         res.status(200).json({message: "新規登録が完了しました。", customer: newCustomer});
@@ -43,3 +49,14 @@ exports.tokenlogin = async (req, res) => {
       res.status(400).json({ message: err.message });
     }
 };
+
+exports.getAllCustomers = async (req, res) => {
+    try {
+        const customers = await Customer.find();
+        const facilities = await Facility.find({ allowed: "allowed" });
+        const jobposts = await JobPost.find({ allowed: "allowed" });
+        res.status(200).json({message: "顧客一覧取得成功", customers: customers, facilities: facilities, jobposts: jobposts});
+    } catch (error) {
+        res.status(500).json({message: "サーバーエラー", error: true});
+    }
+}
