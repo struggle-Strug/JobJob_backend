@@ -2,13 +2,11 @@ const mongoose = require("mongoose");
 
 const JobPostSchema = new mongoose.Schema({
     facility_id: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Facility',
+        type: String,
         required: true,
     },
     customer_id: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Customer',
+        type: String,
         required: true,
     },
     jobpost_id: {
@@ -111,7 +109,7 @@ const JobPostSchema = new mongoose.Schema({
     },
     allowed: {
         type: String,
-        default: "pending"
+        default: "draft"
     },
     registered_at: {
         type: Date,
