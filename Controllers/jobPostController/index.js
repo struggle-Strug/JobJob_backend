@@ -6,7 +6,7 @@ exports.createJobPost = async (req, res) => {
         const newJobPost = new JobPostModel({
             name: req.body.name,
             facility_id: req.body.facility_id,
-            customer_id: req.user._id,
+            customer_id: req.body.customer_id,
             jobpost_id: jobposts.length + 1,
             type: req.body.type,
             picture: req.body.picture,
