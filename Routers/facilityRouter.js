@@ -4,6 +4,7 @@ const requireAuth = require("../Middleware/RequireAuth");
 
 router.post("/", requireAuth, facilityController.createFacility);
 router.post("/allow/:id", requireAuth, facilityController.allowFacility);
+router.put("/:id", requireAuth, facilityController.updateFacility);
 router.get("/", requireAuth, facilityController.getFacilities);
 router.get("/all", requireAuth, facilityController.getAllFacilities);
 router.get("/:id", requireAuth, facilityController.getFacility);
