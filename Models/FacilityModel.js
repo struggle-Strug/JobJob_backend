@@ -2,8 +2,7 @@ const mongoose = require("mongoose");
 
 const FacilitySchema = new mongoose.Schema({
     customer_id: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Customer",
+        type: String,
         required: true,
     },
     facility_id: {
@@ -43,7 +42,13 @@ const FacilitySchema = new mongoose.Schema({
     job_type: [{
         type: String
     }],
+    access: [{
+        type: String,
+    }],
     access_station: {
+        type: String,
+    },
+    access_text: {
         type: String,
     },
     facility_genre: {
@@ -64,7 +69,7 @@ const FacilitySchema = new mongoose.Schema({
     },
     allowed: {
         type: String,
-        default: "pending"
+        default: "draft"
     },
     registrationDate: {
         type: Date,
