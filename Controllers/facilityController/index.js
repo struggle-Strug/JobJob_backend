@@ -58,6 +58,17 @@ exports.getFacility = async (req, res) => {
     }
 }
 
+exports.pendingFacility = async (req, res) => {
+    try {
+        const facility = await FacilityModel.findOne({facility_id: req.params.id});
+        facility.allowed = "pending";
+        await facility.save();
+        res.status(200).json({ message: "施設掲載申請成功", facility: facility });
+    } catch (error) {
+        res.status(500).json({ message: "サーバーエラー", error: true });
+    }
+}
+
 exports.allowFacility = async (req, res) => {
     try {
         const facility = await FacilityModel.findOne({facility_id: req.params.id});
@@ -66,32 +77,15 @@ exports.allowFacility = async (req, res) => {
         await facility.save();
         res.status(200).json({ message: "施設承認成功", facility: facility });
     } catch (error) {
+        console.log(error);
         res.status(500).json({ message: "サーバーエラー", error: true });
     }
 }
 
 exports.updateFacility = async (req, res) => {
     try {
-        const facility = await FacilityModel.findOne({facility_id: req.params.id});
-        facility.name = req.body.name;
-        facility.postal_code = req.body.postal_code;
-        facility.prefecture = req.body.prefecture;
-        facility.city = req.body.city;
-        facility.village = req.body.village;
-        facility.building = req.body.building;
-        facility.photo = req.body.photo;
-        facility.introduction = req.body.introduction;
-        facility.job_type = req.body.job_type;
-        facility.access = req.body.access;
-        facility.access_station = req.body.access_station;
-        facility.access_text = req.body.access_text;
-        facility.facility_genre = req.body.facility_genre;
-        facility.service_type = req.body.service_type;
-        facility.establishment_date = req.body.establishment_date;
-        facility.service_time = req.body.service_time;
-        facility.rest_day = req.body.rest_day;
-        await facility.save();
-        res.status(200).json({ message: "更新成功", facility: facility });
+        const facility = await FacilityModel.findOneAndUpdate({facility_id: req.params.id}, req.body);
+        res.status(200).json({ message: "施設を更新しました。", facility: facility });
     } catch (error) {
         console.log(error);
         res.status(500).json({ message: "サーバーエラー", error: true });

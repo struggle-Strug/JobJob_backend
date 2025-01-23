@@ -1,4 +1,6 @@
 const JobPostModel = require("../../Models/JobPostModel")
+const customerModel = require("../../Models/CustomerModel")
+const facilityModel = require("../../Models/FacilityModel")
 
 exports.createJobPost = async (req, res) => {
     try {
@@ -39,14 +41,34 @@ exports.createJobPost = async (req, res) => {
     })
 
     await newJobPost.save();
-    res.status(200).json({ message: "求人を登録しました", jobpost: newJobPost });
+    res.status(200).json({ message: "求人を登録しました。", jobpost: newJobPost });
     } catch (error) {
         console.log(error)
         res.status(500).json({ message: "サーバーエラー", error: true });
     }
 }
 
-exports.getJobPost = async (req, res) => {
+exports.updateJobPost = async (req, res) => {
+    try {
+        const jobPost = await JobPostModel.findOneAndUpdate({ jobpost_id: req.params.id }, req.body);
+        res.status(200).json({ message: "求人を更新しました。", jobpost: jobPost });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "サーバーエラー", error: true });
+    }
+}
+
+exports.getJobPostById = async (req, res) => {
+    try {
+        const jobPost = await JobPostModel.findOne({ jobpost_id: req.params.id });
+        res.status(200).json({ jobpost: jobPost });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "サーバーエラー", error: true });
+    }
+}
+
+exports.getJobPostByFacilityId = async (req, res) => {
     try {
         const jobPost = await JobPostModel.find({ facility_id: req.params.id }).populate("customer_id");
         res.status(200).json({ jobpost: jobPost });
@@ -58,10 +80,37 @@ exports.getJobPost = async (req, res) => {
 
 exports.getJobPosts = async (req, res) => {
     try {
-        const jobPosts = await JobPostModel.find({}).populate("customer_id").populate("facility_id").sort({ created_at: -1 });
-        res.status(200).json({ jobposts: jobPosts });
+        const jobPosts = await JobPostModel.find({}).sort({ created_at: -1 });
+        
+        // Resolve customer and facility data
+        const jobPostsWithDetails = await Promise.all(
+            jobPosts.map(async (jobpost) => {
+                const customer = await customerModel.findOne({ customer_id: jobpost.customer_id });
+                const facility = await facilityModel.findOne({ facility_id: jobpost.facility_id });
+                return {
+                    ...jobpost.toObject(), // Convert MongoDB document to plain object
+                    customer_id: customer, // Include customer data
+                    facility_id: facility, // Include facility data
+                };
+            })
+        );
+
+        res.status(200).json({ jobposts: jobPostsWithDetails });
     } catch (error) {
-        console.log(error);
+        console.error(error);
+        res.status(500).json({ message: "サーバーエラー", error: true });
+    }
+};
+
+
+exports.pendingJobPost = async (req, res) => {
+    try {
+        const jobPost = await JobPostModel.findOne({jobpost_id: req.params.id});
+        jobPost.allowed = "pending";
+        await jobPost.save();
+        res.status(200).json({ message: "求人掲載申請成功", jobPost: jobPost });
+    } catch (error) {
+        console.log(error)
         res.status(500).json({ message: "サーバーエラー", error: true });
     }
 }
@@ -69,7 +118,7 @@ exports.getJobPosts = async (req, res) => {
 exports.allowJobPost = async (req, res) => {
     try {
         const jobPost = await JobPostModel.findByIdAndUpdate(req.params.id, { allowed: "allowed", registered_at: new Date() });
-        res.status(200).json({ message: "求人を許可しました", jobpost: jobPost });
+        res.status(200).json({ message: "求人を許可しました。", jobpost: jobPost });
     } catch (error) {
         console.log(error);
         res.status(500).json({ message: "サーバーエラー", error: true });
