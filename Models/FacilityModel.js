@@ -45,9 +45,6 @@ const FacilitySchema = new mongoose.Schema({
     access: [{
         type: String,
     }],
-    access_station: {
-        type: String,
-    },
     access_text: {
         type: String,
     },

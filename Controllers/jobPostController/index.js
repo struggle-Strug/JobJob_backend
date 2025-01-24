@@ -43,7 +43,6 @@ exports.createJobPost = async (req, res) => {
     await newJobPost.save();
     res.status(200).json({ message: "求人を登録しました。", jobpost: newJobPost });
     } catch (error) {
-        console.log(error)
         res.status(500).json({ message: "サーバーエラー", error: true });
     }
 }
@@ -53,7 +52,6 @@ exports.updateJobPost = async (req, res) => {
         const jobPost = await JobPostModel.findOneAndUpdate({ jobpost_id: req.params.id }, req.body);
         res.status(200).json({ message: "求人を更新しました。", jobpost: jobPost });
     } catch (error) {
-        console.log(error);
         res.status(500).json({ message: "サーバーエラー", error: true });
     }
 }
@@ -61,19 +59,52 @@ exports.updateJobPost = async (req, res) => {
 exports.getJobPostById = async (req, res) => {
     try {
         const jobPost = await JobPostModel.findOne({ jobpost_id: req.params.id });
-        res.status(200).json({ jobpost: jobPost });
+
+        if (!jobPost) {
+            return res.status(404).json({ message: "Job post not found", error: true });
+        }
+
+        // Fetch customer and facility details
+        const customer = await customerModel.findOne({ customer_id: jobPost.customer_id });
+        const facility = await facilityModel.findOne({ facility_id: jobPost.facility_id });
+
+        const jobPostWithDetails = {
+            ...jobPost.toObject(), // Convert MongoDB document to a plain object
+            customer_id: customer, // Include customer data
+            facility_id: facility, // Include facility data
+        };
+
+        res.status(200).json({ jobpost: jobPostWithDetails });
     } catch (error) {
-        console.log(error);
+        console.error("Error fetching job post by ID:", error);
         res.status(500).json({ message: "サーバーエラー", error: true });
     }
-}
+};
+
 
 exports.getJobPostByFacilityId = async (req, res) => {
     try {
-        const jobPost = await JobPostModel.find({ facility_id: req.params.id }).populate("customer_id");
-        res.status(200).json({ jobpost: jobPost });
+        const jobPosts = await JobPostModel.find({ facility_id: req.params.id }).sort({ created_at: -1 });
+
+        if (!jobPosts) {
+            return res.status(404).json({ message: "Job post not found", error: true });
+        }
+
+        // Resolve customer and facility data
+        const jobPostsWithDetails = await Promise.all(
+            jobPosts.map(async (jobpost) => {
+                const customer = await customerModel.findOne({ customer_id: jobpost.customer_id });
+                const facility = await facilityModel.findOne({ facility_id: jobpost.facility_id });
+                return {
+                    ...jobpost.toObject(), // Convert MongoDB document to plain object
+                    customer_id: customer, // Include customer data
+                    facility_id: facility, // Include facility data
+                };
+            })
+        );
+        
+        res.status(200).json({ jobposts: jobPostsWithDetails });
     } catch (error) {
-        console.log(error);
         res.status(500).json({ message: "サーバーエラー", error: true });
     }
 }
@@ -97,7 +128,6 @@ exports.getJobPosts = async (req, res) => {
 
         res.status(200).json({ jobposts: jobPostsWithDetails });
     } catch (error) {
-        console.error(error);
         res.status(500).json({ message: "サーバーエラー", error: true });
     }
 };
@@ -110,7 +140,6 @@ exports.pendingJobPost = async (req, res) => {
         await jobPost.save();
         res.status(200).json({ message: "求人掲載申請成功", jobPost: jobPost });
     } catch (error) {
-        console.log(error)
         res.status(500).json({ message: "サーバーエラー", error: true });
     }
 }
@@ -120,7 +149,6 @@ exports.allowJobPost = async (req, res) => {
         const jobPost = await JobPostModel.findByIdAndUpdate(req.params.id, { allowed: "allowed", registered_at: new Date() });
         res.status(200).json({ message: "求人を許可しました。", jobpost: jobPost });
     } catch (error) {
-        console.log(error);
         res.status(500).json({ message: "サーバーエラー", error: true });
     }
 }
