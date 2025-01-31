@@ -6,7 +6,7 @@ const fs = require('fs');
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         const dir = './uploads';
-        if (!fs.existsSync(dir)){
+        if (!fs.existsSync(dir)) {
             fs.mkdirSync(dir);
         }
         cb(null, dir); // Directory to save uploaded images
@@ -16,25 +16,77 @@ const storage = multer.diskStorage({
     }
 });
 
-// Initialize multer with the storage configuration
-const upload = multer({ storage: storage }).single('file');
+// Initialize multer for single and multiple uploads
+const uploadSingle = multer({ storage: storage }).single('file');
+const uploadMultiple = multer({ storage: storage }).array('files', 10); // Accept up to 10 files
 
-// Controller function for file upload
+// Controller function for single file upload
 exports.uploadFile = (req, res) => {
-    upload(req, res, (err) => {
+    uploadSingle(req, res, (err) => {
         if (err) {
-            // Log the error for debugging
             console.error('Upload error:', err);
-            return res.status(400).json({ message: 'Error uploading file.', error: err.message }); // Include error message
+            return res.status(400).json({ message: 'Error uploading file.', error: err.message });
         }
         if (!req.file) {
             return res.status(400).json({ message: 'No file uploaded.' });
         }
 
-        // Construct the file URL
         const fileUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
-        
-        // Return the file URL in the response
         res.status(200).json({ message: 'File uploaded successfully!', fileUrl });
     });
+};
+
+// Controller function for multiple file uploads
+exports.uploadMultipleFiles = (req, res) => {
+    uploadMultiple(req, res, (err) => {
+        if (err) {
+            console.error('Upload error:', err);
+            return res.status(400).json({ message: 'Error uploading files.', error: err.message });
+        }
+        if (!req.files || req.files.length === 0) {
+            return res.status(400).json({ message: 'No files uploaded.' });
+        }
+
+        const files = req.files.map(file => {
+            return (
+                {
+                    fileUrl: `${req.protocol}://${req.get('host')}/uploads/${file.filename}`,
+                    fileName: Buffer.from(file.originalname, 'latin1').toString('utf8')
+                }
+            )
+        })
+        console.log(files);
+        
+        res.status(200).json({ message: 'Files uploaded successfully!', files: files });
+    });
+};
+
+exports.download = (req, res) => {
+    try {
+        const filename = req.params.filename;
+        const filePath = path.join(__dirname, '..', '..', 'uploads', filename); 
+
+        // Check if the file exists
+        if (fs.existsSync(filePath)) {
+            // Force download by setting the appropriate headers
+            res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+            res.setHeader('Content-Type', 'application/octet-stream');  // Adjust MIME type if necessary
+
+            // Stream the file to the response (downloads the file)
+            const fileStream = fs.createReadStream(filePath);
+            fileStream.pipe(res);
+
+            // Handle any errors during streaming
+            fileStream.on('error', (err) => {
+                console.error('File streaming error:', err);
+                res.status(500).json({ message: 'Error streaming the file', error: true });
+            });
+        } else {
+            console.error('File not found:', filePath);
+            res.status(404).json({ message: 'File not found' });
+        }
+    } catch (error) {
+        console.error('Server error:', error);
+        res.status(500).json({ message: "サーバーエラー", error: true });
+    }
 };
