@@ -60,3 +60,13 @@ exports.getAllCustomers = async (req, res) => {
         res.status(500).json({message: "サーバーエラー", error: true});
     }
 }
+
+exports.getCustomerById = async (req, res) => {
+    try {
+        const customer = await Customer.findOne({customer_id: req.params.id});
+        res.status(200).json({message: "顧客一覧取得成功", customer: customer});
+    }catch(error) {
+        res.status(500).json({message: "サーバーエラー", error: true});
+    }
+}
+
