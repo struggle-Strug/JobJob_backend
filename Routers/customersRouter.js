@@ -5,4 +5,5 @@ router.post("/signup", customersController.signup);
 router.post("/signin", customersController.signin);
 router.get("/tokenlogin", customersController.tokenlogin);
 router.get("/all", customersController.getAllCustomers);
+router.get("/:id", customersController.getCustomerById);
 module.exports = router;
