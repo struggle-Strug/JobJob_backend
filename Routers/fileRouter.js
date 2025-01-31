@@ -8,6 +8,8 @@ const router = express.Router();
 const upload = multer({ dest: './uploads' });
 
 // Route for image upload
+router.post('/multi',  FileCtr.uploadMultipleFiles);
 router.post('/',  FileCtr.uploadFile);
+router.get('/download/:filename',  FileCtr.download);
 
 module.exports = router;

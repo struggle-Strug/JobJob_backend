@@ -1,0 +1,101 @@
+const CustomerModel = require("../../Models/CustomerModel");
+const FacilityModel = require("../../Models/FacilityModel");
+const JobPostModel = require("../../Models/JobPostModel");
+const MessageModel = require("../../Models/MessageModel");
+
+exports.save = async (req, res) => {
+    try{
+        const { jobPost_id, sender, recevier, content } = req.body;
+        const messages = await MessageModel.find({});
+        const message = await MessageModel.find({ jobPost_id: jobPost_id, sender: sender});
+        
+        if(message.length > 0) return res.json({ message: "応募済みです。", error: true });
+        const newMessage = new MessageModel({
+            message_id: messages.length + 1,
+            first: sender,
+            second: recevier,
+            jobPost_id: jobPost_id,
+            content: [
+                {
+                    sender: sender,
+                    recevier: recevier,
+                    message: content,
+                    date: Date.now()
+                }
+            ]
+        });
+        newMessage.save()
+            .then((message) => {
+            res.json({message: message});
+        })
+    }catch(error){
+        res.status(500).json({ message: "サーバーエラー", error: true });
+    }
+}
+
+exports.getMine = async (req, res) => {
+    try{
+        const id = req.params.id;
+        const messages = await MessageModel.find({
+            $or: [{ first: id }, { second: id }],
+        });
+
+        const messageWithDetails = await Promise.all(
+            messages.map(async (message) => {
+                const jobPost = await JobPostModel.findOne({ jobpost_id: message.jobPost_id });
+                const facility = await FacilityModel.findOne({ facility_id: jobPost.facility_id });
+                const customer = await CustomerModel.findOne({ customer_id: jobPost.customer_id });
+                return {
+                    ...message.toObject(), // Convert MongoDB document to plain object
+                    customer_id: customer, // Include customer data
+                    facility_id: facility, // Include facility data
+                };
+            })
+        );
+          
+        res.json({messages: messageWithDetails});
+    }catch(error){
+        console.log(error);
+        
+        res.status(500).json({ message: "サーバーエラー", error: true });
+    }
+}
+
+exports.getById = async (req, res) => {
+    try{
+        const id = req.params.id;
+        const message = await MessageModel.findOne({ message_id: id });
+        
+        const jobPost = await JobPostModel.findOne({ jobpost_id: message.jobPost_id });
+        const facility = await FacilityModel.findOne({ facility_id: jobPost.facility_id });
+        const customer = await CustomerModel.findOne({ customer_id: jobPost.customer_id });
+
+        res.json({message: {...message.toObject(), customer_id: customer, facility_id: facility, jobpost_id: jobPost}});
+    }catch(error){
+        console.log(error);
+        res.status(500).json({ message: "サーバーエラー", error: true });
+    }
+}
+
+exports.send = async (req, res) => {
+    try{
+        const { message_id, sender, message, recevier, files } = req.body;
+        
+        const messages = await MessageModel.findOne({ message_id: message_id });
+        
+        const newMessage = {
+            sender: sender,
+            recevier: recevier,
+            files: files,
+            message: message,
+        }
+        await messages.content.push(newMessage);
+        await messages.save()
+            .then((message) => {
+            res.json({message: message});
+        })
+    }catch(error){
+        console.log(error);
+        res.status(500).json({ message: "サーバーエラー", error: true });
+    }
+}
