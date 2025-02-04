@@ -8,7 +8,8 @@ exports.register =  async(req, res) => {
         if(user){
             return res.json({ message: "既に登録済みのユーザーです。", error: true });
         }
-        const newUser = new User(req.body);
+        const members = await User.find();
+        const newUser = new User({...req.body, member_id: members.length+1});
         const salt = await bcrypt.genSalt(10);
         newUser.password = await bcrypt.hash(req.body.password, salt);
 
