@@ -55,7 +55,6 @@ exports.uploadMultipleFiles = (req, res) => {
                 }
             )
         })
-        console.log(files);
         
         res.status(200).json({ message: 'Files uploaded successfully!', files: files });
     });

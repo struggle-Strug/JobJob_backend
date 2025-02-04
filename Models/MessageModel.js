@@ -40,9 +40,21 @@ const MessageModel = new mongoose.Schema({
                         type: String
                     }
                 }
-            ]
+            ],
+            date: {
+                type: Date,
+                default: Date.now,
+            }
         }
     ],
+    status: {
+        type: String,
+        default: "応募済",
+    },
+    memo: {
+        type: String,
+        default: "",
+    },
     deleted: {
         type: Boolean,
         default: false,

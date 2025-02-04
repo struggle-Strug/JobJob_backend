@@ -2,6 +2,7 @@ const CustomerModel = require("../../Models/CustomerModel");
 const FacilityModel = require("../../Models/FacilityModel");
 const JobPostModel = require("../../Models/JobPostModel");
 const MessageModel = require("../../Models/MessageModel");
+const UserModel = require("../../Models/UserModel");
 
 exports.save = async (req, res) => {
     try{
@@ -91,6 +92,83 @@ exports.send = async (req, res) => {
         }
         await messages.content.push(newMessage);
         await messages.save()
+            .then((message) => {
+            res.json({message: message});
+        })
+    }catch(error){
+        console.log(error);
+        res.status(500).json({ message: "サーバーエラー", error: true });
+    }
+}
+
+exports.getJobNumbersByStatus = async (req, res) => {
+    try{
+        const messages = await MessageModel.find({});
+        const jobNumbers = {
+            allOnGoings: messages.filter((message) => message.status === "応募済" || message.status === "書類選考中" || message.status === "面接日設定済" || message.status === "面接実施中" || message.status === "内定済" || message.status === "内定承諾済").length,
+            allEnds: messages.filter((message) => message.status === "入職済" || message.status === "不採用" || message.status === "内定辞退" || message.status === "選考終了").length,
+            応募済: messages.filter((message) => message.status === "応募済").length,
+            書類選考中: messages.filter((message) => message.status === "書類選考中").length,
+            面接日設定済: messages.filter((message) => message.status === "面接日設定済").length,
+            面接実施中: messages.filter((message) => message.status === "面接実施中").length,
+            内定済: messages.filter((message) => message.status === "内定済").length,
+            内定承諾済: messages.filter((message) => message.status === "内定承諾済").length,
+            入職済: messages.filter((message) => message.status === "入職済").length,
+            不採用: messages.filter((message) => message.status === "不採用").length,
+            内定辞退: messages.filter((message) => message.status === "内定辞退").length,
+            選考終了: messages.filter((message) => message.status === "選考終了").length,
+        }
+        return res.json({ message: "Successfully get JobNumbers", jobNumbers: jobNumbers})
+    }catch(error){
+        console.log(error);
+        res.status(500).json({ message: "サーバーエラー", error: true });
+    }
+}
+
+exports.getByStatus = async (req, res) => {
+    try{
+        const id = req.params.id;
+        const status = req.params.status;
+
+        const messages = await MessageModel.find({
+            $or: [{ first: id }, { second: id }],
+        });
+
+        let filteredMessages;
+        if(status === "allOnGoings") {
+            filteredMessages = messages
+        } else if(status === "allEnds"){
+            filteredMessages = messages.filter((message) => message.status === ("入職済" || "不採用" || "内定辞退" || "選考終了"));
+        } else {
+            filteredMessages = messages.filter((message) => message.status === status);
+        }
+
+        const processes = await Promise.all(
+            filteredMessages.map(async (message) => {
+                const jobPost = await JobPostModel.findOne({ jobpost_id: message.jobPost_id });
+                const facility = await FacilityModel.findOne({ facility_id: jobPost.facility_id });
+                const user_id = message.first === id ? message.second : message.first;
+                const user = await UserModel.findOne({ _id: user_id });
+                return {
+                    ...message.toObject(), // Convert MongoDB document to plain object
+                    facility_id: facility, // Include facility data
+                    jobpost_id: jobPost,
+                    user_id: user // Include user data
+                };
+            })
+        );
+
+        res.json({processes: processes});
+    }catch(error){
+        console.log(error);
+        res.status(500).json({ message: "サーバーエラー", error: true });
+    }
+}
+
+exports.updateMessage = async (req, res) => {
+    try{
+        const message = await MessageModel.findOneAndUpdate({ message_id: req.params.id }, req.body);
+        await message.save()
             .then((message) => {
             res.json({message: message});
         })
