@@ -4,69 +4,173 @@ const JobPost = require("../../Models/JobPostModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 exports.signup = async (req, res) => {
-    try {
-        const customers = await Customer.find();
-        const customer_id = customers.length + 1;
-        const newCustomer = new Customer({
-            customer_id: customer_id,
-            companyName: req.body.companyName,
-            huriganaCompanyName: req.body.huriganaCompanyName,
-            contactPerson: req.body.contactPerson,
-            huriganaContactPerson: req.body.huriganaContactPerson,
-            phoneNumber: req.body.phoneNumber,
-            email: req.body.email,
-            password: "",
-            registrationDate: ""
-        });
-        await newCustomer.save();
-        res.status(200).json({message: "新規登録が完了しました。", customer: newCustomer});
-    } catch (error) {
-        res.status(500).json({message: "サーバーエラー", error: true});
-    }
-}
+  try {
+    const customers = await Customer.find();
+    const customer_id = customers.length + 1;
+    const newCustomer = new Customer({
+      customer_id: customer_id,
+      companyName: req.body.companyName,
+      huriganaCompanyName: req.body.huriganaCompanyName,
+      contactPerson: req.body.contactPerson,
+      huriganaContactPerson: req.body.huriganaContactPerson,
+      phoneNumber: req.body.phoneNumber,
+      email: req.body.email,
+      password: "",
+      registrationDate: "",
+    });
+    await newCustomer.save();
+    res
+      .status(200)
+      .json({ message: "新規登録が完了しました。", customer: newCustomer });
+  } catch (error) {
+    res.status(500).json({ message: "サーバーエラー", error: true });
+  }
+};
 
 exports.signin = async (req, res) => {
-    try {
-        const customer = await Customer.findOne({email: req.body.email, allowed: true});
-        if(!customer) return res.json({message: "ユーザーが見つかりません。", error: true});
+  try {
+    const customer = await Customer.findOne({
+      email: req.body.email,
+      allowed: true,
+    });
+    if (!customer)
+      return res.json({ message: "法人が見つかりません。", error: true });
 
-        // const isMatch = await bcrypt.compare(req.body.password, customer.password);
-        // if(!isMatch) return res.json({message: "パスワードが間違っています。", error: true});
+    const isMatch = await bcrypt.compare(req.body.password, customer.password);
+    if (!isMatch)
+      return res.json({ message: "パスワードが間違っています。", error: true });
 
-        const token = jwt.sign({id: customer._id}, process.env.SECRET, {expiresIn: "30d"});
-        return res.status(200).json({message: "ログイン成功!", token: `JWT ${token}`, customer: customer});
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({message: "サーバーエラー", error: true});
-    }
-}
+    const token = jwt.sign({ id: customer._id }, process.env.SECRET, {
+      expiresIn: "30d",
+    });
+    return res.status(200).json({
+      message: "ログイン成功!",
+      token: `JWT ${token}`,
+      customer: customer,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "サーバーエラー", error: true });
+  }
+};
 
 exports.tokenlogin = async (req, res) => {
-    try {
-      const token = jwt.sign({ id: req.user._id }, process.env.SECRET, { expiresIn: "30d" });
-      return res.status(200).json({ message: "ログイン成功!", token: `JWT ${token}`, customer: req.user });
-    } catch (err) {
-      res.status(400).json({ message: err.message });
-    }
+  try {
+    const token = jwt.sign({ id: req.user._id }, process.env.SECRET, {
+      expiresIn: "30d",
+    });
+    return res.status(200).json({
+      message: "ログイン成功!",
+      token: `JWT ${token}`,
+      customer: req.user,
+    });
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
 };
 
 exports.getAllCustomers = async (req, res) => {
-    try {
-        const customers = await Customer.find();
-        const facilities = await Facility.find({ allowed: "allowed" });
-        const jobposts = await JobPost.find({ allowed: "allowed" });
-        res.status(200).json({message: "顧客一覧取得成功", customers: customers, facilities: facilities, jobposts: jobposts});
-    } catch (error) {
-        res.status(500).json({message: "サーバーエラー", error: true});
-    }
-}
+  try {
+    const customers = await Customer.find();
+    const facilities = await Facility.find({ allowed: "allowed" });
+    const jobposts = await JobPost.find({ allowed: "allowed" });
+    res.status(200).json({
+      message: "顧客一覧取得成功",
+      customers: customers,
+      facilities: facilities,
+      jobposts: jobposts,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "サーバーエラー", error: true });
+  }
+};
 
 exports.getCustomerById = async (req, res) => {
-    try {
-        const customer = await Customer.findOne({customer_id: req.params.id});
-        res.status(200).json({message: "顧客一覧取得成功", customer: customer});
-    }catch(error) {
-        res.status(500).json({message: "サーバーエラー", error: true});
-    }
-}
+  try {
+    const customer = await Customer.findOne({ customer_id: req.params.id });
+    res.status(200).json({ message: "顧客一覧取得成功", customer: customer });
+  } catch (error) {
+    res.status(500).json({ message: "サーバーエラー", error: true });
+  }
+};
 
+exports.updateEmail = async (req, res) => {
+  try {
+    const customer = await Customer.findOne({ _id: req.params.id });
+    customer.email = req.body.email;
+    await customer.save();
+    res
+      .status(200)
+      .json({ message: "メールアドレスを変更しました。", customer: customer });
+  } catch (error) {
+    res.status(500).json({ message: "サーバーエラー", error: true });
+  }
+};
+
+exports.updatePassword = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { currentPassword, newPassword } = req.body;
+    const customer = await Customer.findById(id);
+    const isMatch = await bcrypt.compare(currentPassword, customer.password);
+    if (!isMatch) {
+      return res.json({ message: "パスワードが一致しません", error: true });
+    }
+    const salt = await bcrypt.genSalt(10);
+    customer.password = await bcrypt.hash(newPassword, salt);
+
+    await customer.save();
+    res.status(200).json({ message: "パスワード更新成功" });
+  } catch (error) {
+    res.status(500).json({ message: "サーバーエラー", error: true });
+  }
+};
+
+exports.getUsers = async (req, res) => {
+  try {
+    const users = await Customer.find({
+      companyName: req.user.data.companyName,
+    });
+    res.status(200).json({ message: "ユーザー一覧取得成功", users: users });
+  } catch (error) {
+    res.status(500).json({ message: "サーバーエラー", error: true });
+  }
+};
+
+exports.addUser = async (req, res) => {
+  try {
+    const customers = await Customer.find();
+    const customer_id = customers.length + 1;
+
+    const newCustomer = new Customer({
+      customer_id: customer_id,
+      companyName: req.user.data.companyName,
+      huriganaCompanyName: req.user.data.huriganaCompanyName,
+      contactPerson: req.body.contactPerson,
+      huriganaContactPerson: req.body.huriganaContactPerson,
+      phoneNumber: req.body.phoneNumber,
+      email: req.body.email,
+      registrationDate: new Date(),
+    });
+
+    const salt = await bcrypt.genSalt(10);
+    newCustomer.password = await bcrypt.hash(req.body.password, salt);
+    await newCustomer.save();
+    res
+      .status(200)
+      .json({ message: "新規登録が完了しました。", customer: newCustomer });
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({ message: "サーバーエラー", error: true });
+  }
+};
+
+exports.deleteUser = async (req, res) => {
+  try {
+    const user = await Customer.findByIdAndDelete(req.params.id);
+    res.status(200).json({ message: "削除成功!", user: user });
+  } catch (error) {
+    res.status(500).json({ message: "サーバーエラー", error: true });
+  }
+};
