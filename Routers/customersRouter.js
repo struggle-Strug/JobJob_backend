@@ -2,8 +2,8 @@ const router = require("express").Router();
 const requireAuth = require("../Middleware/requireAuth");
 const customersController = require("../Controllers/customersController");
 
-router.post("/signup", requireAuth, customersController.signup);
-router.post("/signin", requireAuth, customersController.signin);
+router.post("/signup", customersController.signup);
+router.post("/signin", customersController.signin);
 router.post("/users", requireAuth, customersController.addUser);
 router.put("/email/:id", requireAuth, customersController.updateEmail);
 router.put("/password/:id", requireAuth, customersController.updatePassword);
