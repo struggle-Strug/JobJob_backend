@@ -102,7 +102,18 @@ exports.getFacility = async (req, res) => {
     const facility = await FacilityModel.findOne({
       facility_id: req.params.id,
     });
-    res.status(200).json({ message: "施設取得成功", facility: facility });
+
+    const jobPosts = (
+      await JobPostModel.find({ facility_id: facility.facility_id })
+    ).filter((jobPost) => jobPost.allowed === "allowed");
+
+    const facilityWithDetails = {
+      ...facility.toObject(),
+      jobPosts: jobPosts,
+    };
+    res
+      .status(200)
+      .json({ message: "施設取得成功", facility: facilityWithDetails });
   } catch (error) {
     res.status(500).json({ message: "サーバーエラー", error: true });
   }
