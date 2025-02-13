@@ -1,5 +1,6 @@
 const FacilityModel = require("../../Models/FacilityModel");
 const CustomerModel = require("../../Models/CustomerModel");
+const JobPostModel = require("../../Models/JobPostModel");
 
 exports.createFacility = async (req, res) => {
   try {
@@ -34,9 +35,53 @@ exports.createFacility = async (req, res) => {
 
 exports.getFacilities = async (req, res) => {
   try {
-    const facilities = await FacilityModel.find({});
-    res.status(200).json({ message: "施設取得成功", facility: facilities });
+    const { jobType, facility, pref, employmentType } = req.query;
+
+    if (Object.keys(req.query).length === 0) {
+      const facilities = await FacilityModel.find({});
+      return res
+        .status(200)
+        .json({ message: "施設取得成功", facility: facilities });
+    }
+
+    let filter = {};
+    if (jobType) filter.job_type = { $in: [jobType] }; // Match jobType in the array
+    if (facility) filter.facility_genre = facility;
+    if (pref) filter.prefecture = pref;
+    filter.allowed === "allowed";
+
+    // Fetch facilities based on the dynamic filter
+    const facilities = await FacilityModel.find(filter);
+
+    // Fetch job posts for each facility
+    const facilitiesWithDetails = await Promise.all(
+      facilities.map(async (facility) => {
+        const jobPosts = await JobPostModel.find({
+          facility_id: facility.facility_id,
+          allowed: "allowed", // Only fetch allowed job posts
+        });
+
+        return {
+          ...facility.toObject(),
+          jobPosts, // Include filtered jobPosts data
+        };
+      })
+    );
+
+    // Filter facilities based on employmentType (if provided)
+    const filteredFacilities = employmentType
+      ? facilitiesWithDetails.filter((facility) =>
+          facility.jobPosts.some((jobpost) =>
+            jobpost.employment_type.includes(employmentType)
+          )
+        )
+      : facilitiesWithDetails;
+
+    res
+      .status(200)
+      .json({ message: "施設取得成功", facility: filteredFacilities });
   } catch (error) {
+    console.error("Error fetching facilities:", error);
     res.status(500).json({ message: "サーバーエラー", error: true });
   }
 };
