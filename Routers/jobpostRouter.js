@@ -7,6 +7,7 @@ router.post("/allow/:id", requireAuth, jobPostController.allowJobPost);
 router.post("/copy/:id", requireAuth, jobPostController.createJobPostByCopy);
 router.put("/:id", requireAuth, jobPostController.updateJobPost);
 router.post("/", requireAuth, jobPostController.createJobPost);
+router.post("/favouriteorrecent", requireAuth, jobPostController.getFavourites);
 router.get(
   "/facility/:id",
   requireAuth,
