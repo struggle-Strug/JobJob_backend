@@ -117,7 +117,8 @@ exports.updatePassword = async (req, res) => {
       return res.json({ message: "パスワードが一致しません", error: true });
     }
     const salt = await bcrypt.genSalt(10);
-    customer.password = await bcrypt.hash(newPassword, salt);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+    customer.password = hashedPassword;
 
     await customer.save();
     res.status(200).json({ message: "パスワード更新成功" });
