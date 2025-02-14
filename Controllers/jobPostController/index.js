@@ -228,3 +228,34 @@ exports.allowJobPost = async (req, res) => {
     res.status(500).json({ message: "サーバーエラー", error: true });
   }
 };
+
+exports.getFavourites = async (req, res) => {
+  try {
+    const jobPosts = await JobPostModel.find({
+      jobpost_id: { $in: req.body.data },
+    });
+    // Resolve customer and facility data
+    const jobPostsWithDetails = await Promise.all(
+      jobPosts.map(async (jobpost) => {
+        const customer = await customerModel.findOne({
+          customer_id: jobpost.customer_id,
+        });
+        const facility = await facilityModel.findOne({
+          facility_id: jobpost.facility_id,
+        });
+        return {
+          ...jobpost.toObject(), // Convert MongoDB document to plain object
+          customer_id: customer, // Include customer data
+          facility_id: facility, // Include facility data
+        };
+      })
+    );
+    res
+      .status(200)
+      .json({ message: "求人取得成功", jobPosts: jobPostsWithDetails });
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({ message: "サーバーエラー", error: true });
+  }
+};

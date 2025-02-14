@@ -35,6 +35,11 @@ exports.signin = async (req, res) => {
     });
     if (!customer)
       return res.json({ message: "法人が見つかりません。", error: true });
+    if (customer.deleted)
+      return res.json({
+        message: "アクセス権が無効になりました。",
+        error: true,
+      });
 
     const isMatch = await bcrypt.compare(req.body.password, customer.password);
     if (!isMatch)
