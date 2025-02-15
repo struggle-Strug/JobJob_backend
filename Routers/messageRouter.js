@@ -12,7 +12,7 @@ router.get(
   messageController.getAllJobNumbersByStatus
 );
 router.get("/jobNumbers", requireAuth, messageController.getJobNumbersByStatus);
+router.get("/detail/:id", requireAuth, messageController.getById);
 router.get("/:id/:status", requireAuth, messageController.getByStatus);
 router.get("/:status", requireAuth, messageController.getAllByStatus);
-router.get("/:id", requireAuth, messageController.getById);
 module.exports = router;
