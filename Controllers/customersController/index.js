@@ -1,12 +1,25 @@
 const Customer = require("../../Models/CustomerModel");
 const Facility = require("../../Models/FacilityModel");
 const JobPost = require("../../Models/JobPostModel");
+const crypto = require("crypto");
+const sgMail = require("@sendgrid/mail");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 exports.signup = async (req, res) => {
   try {
+    const customer = await Customer.findOne({ email: req.body.email });
+    if (customer)
+      return res.json({
+        message: "このメールアドレスは既に登録されています。",
+        error: true,
+      });
+
     const customers = await Customer.find();
     const customer_id = customers.length + 1;
+    const initalPassword = await generateRandomPassword();
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(initalPassword, salt);
     const newCustomer = new Customer({
       customer_id: customer_id,
       companyName: req.body.companyName,
@@ -15,13 +28,24 @@ exports.signup = async (req, res) => {
       huriganaContactPerson: req.body.huriganaContactPerson,
       phoneNumber: req.body.phoneNumber,
       email: req.body.email,
-      password: "",
-      registrationDate: "",
+      password: hashedPassword,
+      registrationDate: new Date(),
     });
     await newCustomer.save();
     res
       .status(200)
       .json({ message: "新規登録が完了しました。", customer: newCustomer });
+
+    const msg = {
+      to: req.body.email,
+      from: "your-email@example.com", // Must be a verified sender on SendGrid
+      subject: "Your Account Password",
+      text: `Your password is: ${initalPassword}`,
+      html: `<strong>Your password is: ${initalPassword}</strong>`,
+    };
+
+    await sgMail.send(msg);
+    res.json({ message: "Signup successful! Password sent to your email." });
   } catch (error) {
     res.status(500).json({ message: "サーバーエラー", error: true });
   }
@@ -31,7 +55,7 @@ exports.signin = async (req, res) => {
   try {
     const customer = await Customer.findOne({
       email: req.body.email,
-      allowed: true,
+      // allowed: true,
     });
     if (!customer)
       return res.json({ message: "法人が見つかりません。", error: true });
@@ -179,4 +203,12 @@ exports.deleteUser = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: "サーバーエラー", error: true });
   }
+};
+
+const generateRandomPassword = () => {
+  return crypto
+    .randomBytes(12)
+    .toString("base64")
+    .slice(0, 12)
+    .replace(/[^a-zA-Z0-9]/g, ""); // Alphanumeric characters only
 };
