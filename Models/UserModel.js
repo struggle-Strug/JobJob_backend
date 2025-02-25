@@ -74,7 +74,7 @@ const userSchema = new mongoose.Schema({
   prefecture: {
     type: String,
   },
-  municipality: {
+  municipalities: {
     type: String,
   },
   village: {
