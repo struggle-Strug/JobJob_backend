@@ -37,14 +37,27 @@ exports.getFacilities = async (req, res) => {
   try {
     const { jobType, facility, pref, employmentType } = req.query;
 
+    const customer = await CustomerModel.findOne({
+      customer_id: req.user.data.customer_id,
+    });
+
+    const customers = await CustomerModel.find({
+      companyName: customer.companyName,
+    });
+    const customerIds = customers.map((customer) => customer.customer_id);
+
     if (Object.keys(req.query).length === 0) {
-      const facilities = await FacilityModel.find({});
+      const facilities = await FacilityModel.find({
+        customer_id: { $in: customerIds },
+      });
       return res
         .status(200)
         .json({ message: "施設取得成功", facility: facilities });
     }
 
-    let filter = {};
+    let filter = {
+      customer_id: { $in: customerIds }, // Always include this condition when filters are applied
+    };
     if (jobType) filter.job_type = { $in: [jobType] }; // Match jobType in the array
     if (facility) filter.facility_genre = facility;
     if (pref) filter.prefecture = pref;

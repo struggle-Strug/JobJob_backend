@@ -6,8 +6,9 @@ const { globSync } = require("glob");
 const path = require("path");
 const mongoose = require("mongoose");
 const passport = require("passport");
+const sgMail = require("@sendgrid/mail");
 
-dotenv.config();
+dotenv.config({ path: ".env.local" });
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -20,8 +21,7 @@ app.use(bodyParser.json({ limit: "5mb" })); // Send JSON responses
 app.use(bodyParser.urlencoded({ extended: false, limit: "5mb" })); // Parses urlencoded bodies
 
 // Serve static files from the 'uploads' directory
-app.use('/uploads', express.static('uploads'));
-
+app.use("/uploads", express.static("uploads"));
 
 // Connect to MongoDB
 const connectToMongoDB = async () => {
@@ -41,14 +41,20 @@ connectToMongoDB();
 // Passport
 app.use(passport.initialize());
 
+// Set your SendGrid API key
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
 const routes = new globSync("./Routers/*Router.js");
 
 routes.forEach((file) => {
   // Convert file path to proper format
   const router = require(path.resolve(file));
-  
+
   // Get the base name of the router (e.g., "userRouter" from "userRouter.js")
-  const routeName = path.basename(file, '.js').toLowerCase().replace('router', '');
+  const routeName = path
+    .basename(file, ".js")
+    .toLowerCase()
+    .replace("router", "");
   // Use the router with its path
   app.use(`${process.env.API_PREFIX}/${routeName}`, router);
 });

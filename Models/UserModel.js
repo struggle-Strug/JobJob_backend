@@ -74,6 +74,15 @@ const userSchema = new mongoose.Schema({
   prefecture: {
     type: String,
   },
+  municipalities: {
+    type: String,
+  },
+  village: {
+    type: String,
+  },
+  building: {
+    type: String,
+  },
   desirePrefecture: [
     {
       type: String,
@@ -162,6 +171,12 @@ const userSchema = new mongoose.Schema({
   deleted: {
     type: Boolean,
     default: false,
+  },
+  postalCode: {
+    type: String,
+  },
+  currentStatus: {
+    type: String,
   },
   created_at: {
     type: Date,
