@@ -197,3 +197,14 @@ exports.getByCompany = async (req, res) => {
     res.status(500).json({ message: "サーバーエラー", error: true });
   }
 };
+
+exports.deleteFacility = async (req, res) => {
+  try {
+    const facility = await FacilityModel.findOneAndDelete({
+      facility_id: req.params.id,
+    });
+    res.status(200).json({ message: "施設削除成功", facility: facility });
+  } catch (error) {
+    res.status(500).json({ message: "サーバーエラー", error: true });
+  }
+};
