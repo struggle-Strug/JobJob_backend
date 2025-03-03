@@ -41,9 +41,6 @@ connectToMongoDB();
 // Passport
 app.use(passport.initialize());
 
-// Set your SendGrid API key
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-
 const routes = new globSync("./Routers/*Router.js");
 
 routes.forEach((file) => {
