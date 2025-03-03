@@ -14,6 +14,9 @@ exports.signup = async (req, res) => {
         error: true,
       });
 
+    // Set your SendGrid API key
+    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
     const customers = await Customer.find();
     const customer_id = customers.length + 1;
     const initalPassword = await generateRandomPassword();
@@ -32,20 +35,18 @@ exports.signup = async (req, res) => {
       registrationDate: new Date(),
     });
     await newCustomer.save();
-    res
-      .status(200)
-      .json({ message: "新規登録が完了しました。", customer: newCustomer });
-
     const msg = {
       to: req.body.email,
-      from: "your-email@example.com", // Must be a verified sender on SendGrid
-      subject: "Your Account Password",
-      text: `Your password is: ${initalPassword}`,
-      html: `<strong>Your password is: ${initalPassword}</strong>`,
+      from: "huskar020911@gmail.com", // Must be a verified sender on SendGrid
+      subject: "イニシャルパスワード",
+      text: `イニシャルパスワードは: ${initalPassword}`,
+      html: `<strong>イニシャルパスワードは: ${initalPassword}</strong>`,
     };
 
     await sgMail.send(msg);
-    res.json({ message: "Signup successful! Password sent to your email." });
+    res
+      .status(200)
+      .json({ message: "新規登録が完了しました。", customer: newCustomer });
   } catch (error) {
     res.status(500).json({ message: "サーバーエラー", error: true });
   }
