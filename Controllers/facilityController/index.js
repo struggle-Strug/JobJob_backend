@@ -132,30 +132,17 @@ exports.getFacility = async (req, res) => {
   }
 };
 
-exports.pendingFacility = async (req, res) => {
+exports.updateFacilityStatus = async (req, res) => {
   try {
     const facility = await FacilityModel.findOne({
       facility_id: req.params.id,
     });
-    facility.allowed = "pending";
+    facility.allowed = req.params.status;
     await facility.save();
-    res.status(200).json({ message: "施設掲載申請成功", facility: facility });
+    res
+      .status(200)
+      .json({ message: "施設アップデート成功", facility: facility });
   } catch (error) {
-    res.status(500).json({ message: "サーバーエラー", error: true });
-  }
-};
-
-exports.allowFacility = async (req, res) => {
-  try {
-    const facility = await FacilityModel.findOne({
-      facility_id: req.params.id,
-    });
-    facility.allowed = "allowed";
-    facility.registrationDate = new Date();
-    await facility.save();
-    res.status(200).json({ message: "施設承認成功", facility: facility });
-  } catch (error) {
-    console.log(error);
     res.status(500).json({ message: "サーバーエラー", error: true });
   }
 };
@@ -194,6 +181,17 @@ exports.getByCompany = async (req, res) => {
     res.status(200).json({ message: "施設取得成功", facilities: facilities });
   } catch (error) {
     console.error(error);
+    res.status(500).json({ message: "サーバーエラー", error: true });
+  }
+};
+
+exports.deleteFacility = async (req, res) => {
+  try {
+    const facility = await FacilityModel.findOneAndDelete({
+      facility_id: req.params.id,
+    });
+    res.status(200).json({ message: "施設削除成功", facility: facility });
+  } catch (error) {
     res.status(500).json({ message: "サーバーエラー", error: true });
   }
 };
