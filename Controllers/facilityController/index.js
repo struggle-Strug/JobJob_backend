@@ -37,27 +37,73 @@ exports.getFacilities = async (req, res) => {
   try {
     const { jobType, facility, pref, employmentType } = req.query;
 
-    const customer = await CustomerModel.findOne({
-      customer_id: req.user.data.customer_id,
-    });
+    if (req.user.data.role === "customer") {
+      const customer = await CustomerModel.findOne({
+        customer_id: req.user.data.customer_id,
+      });
 
-    const customers = await CustomerModel.find({
-      companyName: customer.companyName,
-    });
-    const customerIds = customers.map((customer) => customer.customer_id);
+      const customers = await CustomerModel.find({
+        companyName: customer.companyName,
+      });
+      const customerIds = customers.map((customer) => customer.customer_id);
+
+      if (Object.keys(req.query).length === 0) {
+        const facilities = await FacilityModel.find({
+          customer_id: { $in: customerIds },
+        });
+        return res
+          .status(200)
+          .json({ message: "施設取得成功", facility: facilities });
+      }
+
+      let filter = {
+        customer_id: { $in: customerIds }, // Always include this condition when filters are applied
+      };
+      if (jobType) filter.job_type = { $in: [jobType] }; // Match jobType in the array
+      if (facility) filter.facility_genre = facility;
+      if (pref) filter.prefecture = pref;
+      filter.allowed === "allowed";
+
+      // Fetch facilities based on the dynamic filter
+      const facilities = await FacilityModel.find(filter);
+
+      // Fetch job posts for each facility
+      const facilitiesWithDetails = await Promise.all(
+        facilities.map(async (facility) => {
+          const jobPosts = await JobPostModel.find({
+            facility_id: facility.facility_id,
+            allowed: "allowed", // Only fetch allowed job posts
+          });
+
+          return {
+            ...facility.toObject(),
+            jobPosts, // Include filtered jobPosts data
+          };
+        })
+      );
+
+      // Filter facilities based on employmentType (if provided)
+      const filteredFacilities = employmentType
+        ? facilitiesWithDetails.filter((facility) =>
+            facility.jobPosts.some((jobpost) =>
+              jobpost.employment_type.includes(employmentType)
+            )
+          )
+        : facilitiesWithDetails;
+
+      res
+        .status(200)
+        .json({ message: "施設取得成功", facility: filteredFacilities });
+    }
 
     if (Object.keys(req.query).length === 0) {
-      const facilities = await FacilityModel.find({
-        customer_id: { $in: customerIds },
-      });
+      const facilities = await FacilityModel.find({});
       return res
         .status(200)
         .json({ message: "施設取得成功", facility: facilities });
     }
 
-    let filter = {
-      customer_id: { $in: customerIds }, // Always include this condition when filters are applied
-    };
+    let filter = {};
     if (jobType) filter.job_type = { $in: [jobType] }; // Match jobType in the array
     if (facility) filter.facility_genre = facility;
     if (pref) filter.prefecture = pref;
