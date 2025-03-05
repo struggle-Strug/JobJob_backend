@@ -5,6 +5,7 @@ const requireAuth = require("../Middleware/RequireAuth");
 router.post("/pending/:id", requireAuth, jobPostController.pendingJobPost);
 router.post("/allow/:id", requireAuth, jobPostController.allowJobPost);
 router.post("/copy/:id", requireAuth, jobPostController.createJobPostByCopy);
+router.post("/filter", requireAuth, jobPostController.getFilteredJobPosts);
 router.put("/:id", requireAuth, jobPostController.updateJobPost);
 router.post("/", requireAuth, jobPostController.createJobPost);
 router.post("/favouriteorrecent", requireAuth, jobPostController.getFavourites);
