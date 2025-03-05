@@ -9,12 +9,8 @@ router.post("/filter", jobPostController.getFilteredJobPosts);
 router.put("/:id", requireAuth, jobPostController.updateJobPost);
 router.post("/", requireAuth, jobPostController.createJobPost);
 router.post("/favouriteorrecent", requireAuth, jobPostController.getFavourites);
-router.get(
-  "/facility/:id",
-  requireAuth,
-  jobPostController.getJobPostByFacilityId
-);
-router.get("/:id", requireAuth, jobPostController.getJobPostById);
+router.get("/facility/:id", jobPostController.getJobPostByFacilityId);
+router.get("/:id", jobPostController.getJobPostById);
 router.get("/", requireAuth, jobPostController.getJobPosts);
 
 module.exports = router;
