@@ -300,6 +300,30 @@ exports.getFilteredJobPosts = async (req, res) => {
           return filters.feature.every((f) => jobPostFeatures.includes(f)); // Filter if feature_1 matches
         }
         return true; // Include all if feature_1 is null
+      })
+      .filter((jobpost) => {
+        if (filters.monthlySalary) {
+          if (jobpost.salary_type === "月給") {
+            // Check if monthlySalary is not null
+            const salaryMin = jobpost.salary_min;
+            const monthlySalary = parseInt(filters.monthlySalary);
+            return salaryMin >= monthlySalary; // Filter if monthlySalary matches
+          }
+          return true;
+        }
+        return true; // Include all if monthlySalary is null
+      })
+      .filter((jobpost) => {
+        if (filters.hourlySalary) {
+          if (jobpost.salary_type === "時給") {
+            // Check if hourlySalary is not null
+            const salaryMin = jobpost.salary_min;
+            const hourlySalary = parseInt(filters.hourlySalary);
+            return salaryMin >= hourlySalary; // Filter if hourlySalary matches
+          }
+          return true;
+        }
+        return true; // Include all if hourlySalary is null
       });
 
     return res.json({
