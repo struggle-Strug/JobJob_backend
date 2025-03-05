@@ -259,3 +259,56 @@ exports.getFavourites = async (req, res) => {
     res.status(500).json({ message: "サーバーエラー", error: true });
   }
 };
+
+exports.getFilteredJobPosts = async (req, res) => {
+  try {
+    const filters = req.body;
+    const jobPosts = await JobPostModel.find({});
+    const jobPostsWithDetails = await Promise.all(
+      jobPosts.map(async (jobpost) => {
+        const facility = await facilityModel.findOne({
+          facility_id: jobpost.facility_id,
+        });
+        return {
+          ...jobpost.toObject(), // Convert MongoDB document to plain object
+          facility_id: facility, // Include facility data
+        };
+      })
+    );
+    const filteredJobPosts = jobPostsWithDetails
+      .filter((jobpost) => jobpost.allowed === "allowed")
+      .filter((jobpost) => jobpost.type === filters.JobType) // Filter by job type
+      .filter((jobpost) => jobpost.facility_id.prefecture === filters.pref) // Filter by prefecture
+      .filter(
+        (jobpost) =>
+          filters.employmentType.length > 0
+            ? filters.employmentType.includes(jobpost.employment_type[0])
+            : true // Include all if employment_type is null
+      )
+      .filter((jobpost) => {
+        if (filters.feature.length > 0) {
+          // Check if feature_1 is not null
+          const jobPostFeatures = [
+            ...jobpost.work_item,
+            ...jobpost.service_subject,
+            ...jobpost.service_type,
+            ...jobpost.treatment_type,
+            ...jobpost.rest_type,
+            ...jobpost.work_time_type,
+            ...jobpost.education_content,
+          ];
+          return filters.feature.every((f) => jobPostFeatures.includes(f)); // Filter if feature_1 matches
+        }
+        return true; // Include all if feature_1 is null
+      });
+
+    return res.json({
+      message: "Sucessfully fetch jobPosts",
+      jobposts: filteredJobPosts,
+    });
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({ message: "サーバーエラー", error: true });
+  }
+};
