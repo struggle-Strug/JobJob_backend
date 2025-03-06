@@ -281,6 +281,10 @@ exports.getFilteredJobPosts = async (req, res) => {
       .filter((jobpost) => jobpost.facility_id.prefecture === filters.pref) // Filter by prefecture
       .filter(
         (jobpost) =>
+          filters.muni !== "" ? jobpost.facility_id.city === filters.muni : true // Filter by municipality
+      )
+      .filter(
+        (jobpost) =>
           filters.employmentType.length > 0
             ? filters.employmentType.includes(jobpost.employment_type[0])
             : true // Include all if employment_type is null
