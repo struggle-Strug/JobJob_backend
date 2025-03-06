@@ -3,10 +3,14 @@ const FacilityModel = require("../../Models/FacilityModel");
 const JobPostModel = require("../../Models/JobPostModel");
 const MessageModel = require("../../Models/MessageModel");
 const UserModel = require("../../Models/UserModel");
+const sgMail = require("@sendgrid/mail");
 
 exports.save = async (req, res) => {
   try {
     const { jobPost_id, sender, recevier, content } = req.body;
+
+    // Set your SendGrid API key
+    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
     const messages = await MessageModel.find({});
     const message = await MessageModel.find({
       jobPost_id: jobPost_id,
@@ -29,10 +33,21 @@ exports.save = async (req, res) => {
         },
       ],
     });
-    newMessage.save().then((message) => {
-      res.json({ message: message });
-    });
+    await newMessage.save();
+
+    const msg = {
+      to: req.user.data.email,
+      from: "huskar020911@gmail.com", // Must be a verified sender on SendGrid
+      subject: "応募完了",
+      text: `応募が完了しました。`,
+      html: `<strong>応募が完了しました。</strong>`,
+    };
+
+    await sgMail.send(msg);
+    res.status(200).json({ message: "応募が完了しました。" });
   } catch (error) {
+    console.log(error);
+
     res.status(500).json({ message: "サーバーエラー", error: true });
   }
 };
