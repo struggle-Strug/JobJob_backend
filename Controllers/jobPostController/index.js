@@ -263,7 +263,7 @@ exports.getFavourites = async (req, res) => {
 exports.getFilteredJobPosts = async (req, res) => {
   try {
     const filters = req.body;
-    const jobPosts = await JobPostModel.find({});
+    const jobPosts = await JobPostModel.find({}).sort({ created_at: -1 });
     const jobPostsWithDetails = await Promise.all(
       jobPosts.map(async (jobpost) => {
         const facility = await facilityModel.findOne({
