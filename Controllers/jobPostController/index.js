@@ -330,9 +330,16 @@ exports.getFilteredJobPosts = async (req, res) => {
         return true; // Include all if hourlySalary is null
       });
 
+    // Send only the job posts from index 1 to index 30
+    const paginatedJobPosts = filteredJobPosts.slice(
+      30 * (filters.page - 1),
+      30 * filters.page - 1
+    );
+
     return res.json({
       message: "Sucessfully fetch jobPosts",
-      jobposts: filteredJobPosts,
+      jobposts: paginatedJobPosts,
+      allJobPostsNumbers: filteredJobPosts.length,
     });
   } catch (error) {
     console.log(error);
