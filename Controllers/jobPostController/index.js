@@ -278,6 +278,9 @@ exports.getFilteredJobPosts = async (req, res) => {
     const filteredJobPosts = jobPostsWithDetails
       .filter((jobpost) => jobpost.allowed === "allowed")
       .filter((jobpost) => jobpost.type === filters.JobType) // Filter by job type
+      .filter((jobpost) =>
+        filters.facility ? jobpost.facility_id.name === filters.facility : true
+      ) // Filter by facility
       .filter((jobpost) => jobpost.facility_id.prefecture === filters.pref) // Filter by prefecture
       .filter(
         (jobpost) =>
