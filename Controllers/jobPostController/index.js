@@ -209,7 +209,7 @@ exports.getJobPosts = async (req, res) => {
 
 exports.updateJobPostStatus = async (req, res) => {
   try {
-    const jobPost = await JobPostModel.findOne({ jobpost_id: req.params.id });
+    const jobPost = await JobPostModel.findOne({ _id: req.params.id });
     jobPost.allowed = req.params.status;
 
     await jobPost.save();
