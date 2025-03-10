@@ -231,7 +231,11 @@ exports.updateJobPostStatus = async (req, res) => {
           : `求人審査の結果、ご期待に沿うことができませんした。
 修正の上、再度申請をお願いいたします。`
       }`,
-      html: `<strong>求人審査の結果、ご期待に沿うことができませんした。<br />修正の上、再度申請をお願いいたします。</strong>`,
+      html: `${
+        req.params.status === "allowed"
+          ? "<strong>施設審査の結果、掲載をいたしました</strong>"
+          : "<strong>施設審査の結果、ご期待に沿うことができませんした。<br />修正の上、再度申請をお願いいたします。</strong>"
+      }`,
     };
 
     await sgMail.send(msg);

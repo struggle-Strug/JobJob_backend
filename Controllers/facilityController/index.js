@@ -27,6 +27,7 @@ exports.createFacility = async (req, res) => {
       service_time: req.body.service_time,
       rest_day: req.body.rest_day,
     });
+
     await newFacility.save();
     res.status(200).json({ message: "施設登録成功", facility: newFacility });
   } catch (error) {
@@ -204,7 +205,11 @@ exports.updateFacilityStatus = async (req, res) => {
           : `施設審査の結果、ご期待に沿うことができませんした。
 修正の上、再度申請をお願いいたします。`
       }`,
-      html: `<strong>施設審査の結果、ご期待に沿うことができませんした。<br />修正の上、再度申請をお願いいたします。</strong>`,
+      html: `${
+        req.params.status === "allowed"
+          ? "<strong>施設審査の結果、掲載をいたしました</strong>"
+          : "<strong>施設審査の結果、ご期待に沿うことができませんした。<br />修正の上、再度申請をお願いいたします。</strong>"
+      }`,
     };
 
     await sgMail.send(msg);
