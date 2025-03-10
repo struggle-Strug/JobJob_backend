@@ -1,6 +1,7 @@
 const JobPostModel = require("../../Models/JobPostModel");
 const customerModel = require("../../Models/CustomerModel");
 const facilityModel = require("../../Models/FacilityModel");
+const sgMail = require("@sendgrid/mail");
 
 exports.createJobPost = async (req, res) => {
   try {
@@ -206,24 +207,35 @@ exports.getJobPosts = async (req, res) => {
   }
 };
 
-exports.pendingJobPost = async (req, res) => {
+exports.updateJobPostStatus = async (req, res) => {
   try {
     const jobPost = await JobPostModel.findOne({ jobpost_id: req.params.id });
-    jobPost.allowed = "pending";
-    await jobPost.save();
-    res.status(200).json({ message: "求人掲載申請成功", jobPost: jobPost });
-  } catch (error) {
-    res.status(500).json({ message: "サーバーエラー", error: true });
-  }
-};
+    jobPost.allowed = req.params.status;
 
-exports.allowJobPost = async (req, res) => {
-  try {
-    const jobPost = await JobPostModel.findByIdAndUpdate(req.params.id, {
-      allowed: "allowed",
-      registered_at: new Date(),
+    await jobPost.save();
+
+    const customer = await customerModel.findOne({
+      customer_id: jobPost.customer_id,
     });
-    res.status(200).json({ message: "求人を許可しました。", jobpost: jobPost });
+
+    // Set your SendGrid API key
+    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
+    const msg = {
+      to: customer.email,
+      from: "huskar020911@gmail.com", // Must be a verified sender on SendGrid
+      subject: "求人審査結果",
+      text: `${
+        req.params.status === "allowed"
+          ? "求人審査の結果、掲載をいたしました。"
+          : `求人審査の結果、ご期待に沿うことができませんした。
+修正の上、再度申請をお願いいたします。`
+      }`,
+      html: `<strong>求人審査の結果、ご期待に沿うことができませんした。<br />修正の上、再度申請をお願いいたします。</strong>`,
+    };
+
+    await sgMail.send(msg);
+    res.status(200).json({ message: "求人掲載申請成功", jobPost: jobPost });
   } catch (error) {
     res.status(500).json({ message: "サーバーエラー", error: true });
   }

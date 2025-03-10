@@ -1,6 +1,7 @@
 const FacilityModel = require("../../Models/FacilityModel");
 const CustomerModel = require("../../Models/CustomerModel");
 const JobPostModel = require("../../Models/JobPostModel");
+const sgMail = require("@sendgrid/mail");
 
 exports.createFacility = async (req, res) => {
   try {
@@ -185,6 +186,28 @@ exports.updateFacilityStatus = async (req, res) => {
     });
     facility.allowed = req.params.status;
     await facility.save();
+
+    const customer = await CustomerModel.findOne({
+      customer_id: facility.customer_id,
+    });
+
+    // Set your SendGrid API key
+    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
+    const msg = {
+      to: customer.email,
+      from: "huskar020911@gmail.com", // Must be a verified sender on SendGrid
+      subject: "施設審査結果",
+      text: `${
+        req.params.status === "allowed"
+          ? "施設審査の結果、掲載をいたしました。"
+          : `施設審査の結果、ご期待に沿うことができませんした。
+修正の上、再度申請をお願いいたします。`
+      }`,
+      html: `<strong>施設審査の結果、ご期待に沿うことができませんした。<br />修正の上、再度申請をお願いいたします。</strong>`,
+    };
+
+    await sgMail.send(msg);
     res
       .status(200)
       .json({ message: "施設アップデート成功", facility: facility });
