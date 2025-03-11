@@ -9,7 +9,10 @@ exports.createJobPost = async (req, res) => {
     const newJobPost = new JobPostModel({
       facility_id: req.body.facility_id,
       customer_id: req.body.customer_id,
-      jobpost_id: jobPosts.length === 0 ? 1 : jobPosts[jobPosts.length - 1].jobpost_id + 1,,
+      jobpost_id:
+        jobposts.length === 0
+          ? 1
+          : jobposts[jobposts.length - 1].jobpost_id + 1,
       type: req.body.type,
       picture: req.body.picture,
       sub_title: req.body.sub_title,
@@ -58,7 +61,10 @@ exports.createJobPostByCopy = async (req, res) => {
     const newJobPost = new JobPostModel({
       facility_id: jobPost.facility_id,
       customer_id: req.user.data.customer_id,
-      jobpost_id: jobPosts.length === 0 ? 1 : jobPosts[jobPosts.length - 1].jobpost_id + 1,
+      jobpost_id:
+        jobPosts.length === 0
+          ? 1
+          : jobPosts[jobPosts.length - 1].jobpost_id + 1,
       type: jobPost.type,
       picture: jobPost.picture,
       sub_title: jobPost.sub_title,
