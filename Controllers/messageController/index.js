@@ -8,7 +8,7 @@ const sgMail = require("@sendgrid/mail");
 exports.save = async (req, res) => {
   try {
     const { jobPost_id, sender, recevier, content } = req.body;
-    const customer = await Customer.findOne({ _id: recevier });
+    const customer = await CustomerModel.findOne({ _id: recevier });
 
     // Set your SendGrid API key
     sgMail.setApiKey(process.env.SENDGRID_API_KEY);
