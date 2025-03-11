@@ -9,6 +9,7 @@ router.post("/stop/:id", requireAuth, UserCtr.stop);
 router.post("/:id/update", requireAuth, UserCtr.update);
 router.post("/delete/:id", requireAuth, UserCtr.deleteAccount);
 router.post("/login", UserCtr.login);
+router.post("/forgot-password", UserCtr.forgotPassword);
 router.post("/", UserCtr.register);
 router.get("/tokenlogin", requireAuth, UserCtr.tokenlogin);
 router.get("/all", requireAuth, UserCtr.getAll);
