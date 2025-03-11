@@ -225,24 +225,28 @@ exports.updateJobPostStatus = async (req, res) => {
     // Set your SendGrid API key
     sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-    const msg = {
-      to: customer.email,
-      from: "huskar020911@gmail.com", // Must be a verified sender on SendGrid
-      subject: "求人審査結果",
-      text: `${
-        req.params.status === "allowed"
-          ? "求人審査の結果、掲載をいたしました。"
-          : `求人審査の結果、ご期待に沿うことができませんした。
-修正の上、再度申請をお願いいたします。`
-      }`,
-      html: `${
-        req.params.status === "allowed"
-          ? "<strong>施設審査の結果、掲載をいたしました</strong>"
-          : "<strong>施設審査の結果、ご期待に沿うことができませんした。<br />修正の上、再度申請をお願いいたします。</strong>"
-      }`,
-    };
+    if (req.params.status === "allowed") {
+      const msg = {
+        to: customer.email,
+        from: "huskar020911@gmail.com", // Must be a verified sender on SendGrid
+        subject: "施設審査結果",
+        text: `施設審査の結果、掲載をいたしました。`,
+        html: `<strong>施設審査の結果、掲載をいたしました</strong>`,
+      };
 
-    await sgMail.send(msg);
+      await sgMail.send(msg);
+    } else if (req.params.status === "draft") {
+      const msg = {
+        to: customer.email,
+        from: "huskar020911@gmail.com", // Must be a verified sender on SendGrid
+        subject: "施設審査結果",
+        text: `施設審査の結果、ご期待に沿うことができませんした。
+    修正の上、再度申請をお願いいたします。`,
+        html: `<strong>施設審査の結果、ご期待に沿うことができませんした。<br />修正の上、再度申請をお願いいたします。</strong>`,
+      };
+
+      await sgMail.send(msg);
+    }
     res.status(200).json({ message: "求人掲載申請成功", jobPost: jobPost });
   } catch (error) {
     res.status(500).json({ message: "サーバーエラー", error: true });
