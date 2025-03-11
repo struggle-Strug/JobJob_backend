@@ -7,10 +7,9 @@ exports.createJobPost = async (req, res) => {
   try {
     const jobposts = await JobPostModel.find({});
     const newJobPost = new JobPostModel({
-      name: req.body.name,
       facility_id: req.body.facility_id,
       customer_id: req.body.customer_id,
-      jobpost_id: jobposts.length + 1,
+      jobpost_id: jobPosts.length === 0 ? 1 : jobPosts[jobPosts.length - 1].jobpost_id + 1,,
       type: req.body.type,
       picture: req.body.picture,
       sub_title: req.body.sub_title,
@@ -57,10 +56,9 @@ exports.createJobPostByCopy = async (req, res) => {
     const jobPosts = await JobPostModel.find();
     // Create a new job post instance
     const newJobPost = new JobPostModel({
-      name: jobPost.name,
       facility_id: jobPost.facility_id,
       customer_id: req.user.data.customer_id,
-      jobpost_id: jobPosts.length + 1,
+      jobpost_id: jobPosts.length === 0 ? 1 : jobPosts[jobPosts.length - 1].jobpost_id + 1,
       type: jobPost.type,
       picture: jobPost.picture,
       sub_title: jobPost.sub_title,
@@ -209,7 +207,7 @@ exports.getJobPosts = async (req, res) => {
 
 exports.updateJobPostStatus = async (req, res) => {
   try {
-    const jobPost = await JobPostModel.findOne({ _id: req.params.id });
+    const jobPost = await JobPostModel.findOne({ customer_id: req.params.id });
     jobPost.allowed = req.params.status;
 
     await jobPost.save();
