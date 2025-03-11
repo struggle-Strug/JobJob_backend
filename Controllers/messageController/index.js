@@ -8,6 +8,7 @@ const sgMail = require("@sendgrid/mail");
 exports.save = async (req, res) => {
   try {
     const { jobPost_id, sender, recevier, content } = req.body;
+    const customer = await Customer.findOne({ _id: recevier });
 
     // Set your SendGrid API key
     sgMail.setApiKey(process.env.SENDGRID_API_KEY);
@@ -43,7 +44,16 @@ exports.save = async (req, res) => {
       html: `<strong>応募が完了しました。</strong>`,
     };
 
+    const msg_1 = {
+      to: customer.email,
+      from: "huskar020911@gmail.com", // Must be a verified sender on SendGrid
+      subject: "応募完了",
+      text: `応募が完了しました。`,
+      html: `<strong>応募が完了しました。</strong>`,
+    };
+
     await sgMail.send(msg);
+    await sgMail.send(msg_1);
     res.status(200).json({ message: "応募が完了しました。" });
   } catch (error) {
     console.log(error);
@@ -170,7 +180,7 @@ exports.getJobNumbersByStatus = async (req, res) => {
       $or: [{ first: req.user.data._id }, { second: req.user.data._id }],
     });
     const jobNumbers = {
-      allOnGoings: messages.filter(
+      allOnGoings: messages?.filter(
         (message) =>
           message.status === "応募済" ||
           message.status === "書類選考中" ||
@@ -179,29 +189,29 @@ exports.getJobNumbersByStatus = async (req, res) => {
           message.status === "内定済" ||
           message.status === "内定承諾済"
       ).length,
-      allEnds: messages.filter(
+      allEnds: messages?.filter(
         (message) =>
           message.status === "入職済" ||
           message.status === "不採用" ||
           message.status === "内定辞退" ||
           message.status === "選考終了"
       ).length,
-      応募済: messages.filter((message) => message.status === "応募済").length,
-      書類選考中: messages.filter((message) => message.status === "書類選考中")
+      応募済: messages?.filter((message) => message.status === "応募済").length,
+      書類選考中: messages?.filter((message) => message.status === "書類選考中")
         .length,
-      面接日設定済: messages.filter(
+      面接日設定済: messages?.filter(
         (message) => message.status === "面接日設定済"
       ).length,
-      面接実施中: messages.filter((message) => message.status === "面接実施中")
+      面接実施中: messages?.filter((message) => message.status === "面接実施中")
         .length,
-      内定済: messages.filter((message) => message.status === "内定済").length,
-      内定承諾済: messages.filter((message) => message.status === "内定承諾済")
+      内定済: messages?.filter((message) => message.status === "内定済").length,
+      内定承諾済: messages?.filter((message) => message.status === "内定承諾済")
         .length,
-      入職済: messages.filter((message) => message.status === "入職済").length,
-      不採用: messages.filter((message) => message.status === "不採用").length,
-      内定辞退: messages.filter((message) => message.status === "内定辞退")
+      入職済: messages?.filter((message) => message.status === "入職済").length,
+      不採用: messages?.filter((message) => message.status === "不採用").length,
+      内定辞退: messages?.filter((message) => message.status === "内定辞退")
         .length,
-      選考終了: messages.filter((message) => message.status === "選考終了")
+      選考終了: messages?.filter((message) => message.status === "選考終了")
         .length,
     };
     return res.json({
@@ -218,7 +228,7 @@ exports.getAllJobNumbersByStatus = async (req, res) => {
   try {
     const messages = await MessageModel.find({});
     const jobNumbers = {
-      allOnGoings: messages.filter(
+      allOnGoings: messages?.filter(
         (message) =>
           message.status === "応募済" ||
           message.status === "書類選考中" ||
@@ -227,29 +237,29 @@ exports.getAllJobNumbersByStatus = async (req, res) => {
           message.status === "内定済" ||
           message.status === "内定承諾済"
       ).length,
-      allEnds: messages.filter(
+      allEnds: messages?.filter(
         (message) =>
           message.status === "入職済" ||
           message.status === "不採用" ||
           message.status === "内定辞退" ||
           message.status === "選考終了"
       ).length,
-      応募済: messages.filter((message) => message.status === "応募済").length,
-      書類選考中: messages.filter((message) => message.status === "書類選考中")
+      応募済: messages?.filter((message) => message.status === "応募済").length,
+      書類選考中: messages?.filter((message) => message.status === "書類選考中")
         .length,
-      面接日設定済: messages.filter(
+      面接日設定済: messages?.filter(
         (message) => message.status === "面接日設定済"
       ).length,
-      面接実施中: messages.filter((message) => message.status === "面接実施中")
+      面接実施中: messages?.filter((message) => message.status === "面接実施中")
         .length,
-      内定済: messages.filter((message) => message.status === "内定済").length,
-      内定承諾済: messages.filter((message) => message.status === "内定承諾済")
+      内定済: messages?.filter((message) => message.status === "内定済").length,
+      内定承諾済: messages?.filter((message) => message.status === "内定承諾済")
         .length,
-      入職済: messages.filter((message) => message.status === "入職済").length,
-      不採用: messages.filter((message) => message.status === "不採用").length,
-      内定辞退: messages.filter((message) => message.status === "内定辞退")
+      入職済: messages?.filter((message) => message.status === "入職済").length,
+      不採用: messages?.filter((message) => message.status === "不採用").length,
+      内定辞退: messages?.filter((message) => message.status === "内定辞退")
         .length,
-      選考終了: messages.filter((message) => message.status === "選考終了")
+      選考終了: messages?.filter((message) => message.status === "選考終了")
         .length,
     };
     return res.json({
@@ -275,12 +285,12 @@ exports.getByStatus = async (req, res) => {
     if (status === "allOnGoings") {
       filteredMessages = messages;
     } else if (status === "allEnds") {
-      filteredMessages = messages.filter(
+      filteredMessages = messages?.filter(
         (message) =>
           message.status === ("入職済" || "不採用" || "内定辞退" || "選考終了")
       );
     } else {
-      filteredMessages = messages.filter(
+      filteredMessages = messages?.filter(
         (message) => message.status === status
       );
     }
@@ -321,12 +331,12 @@ exports.getAllByStatus = async (req, res) => {
     if (status === "allOnGoings") {
       filteredMessages = messages;
     } else if (status === "allEnds") {
-      filteredMessages = messages.filter(
+      filteredMessages = messages?.filter(
         (message) =>
           message.status === ("入職済" || "不採用" || "内定辞退" || "選考終了")
       );
     } else {
-      filteredMessages = messages.filter(
+      filteredMessages = messages?.filter(
         (message) => message.status === status
       );
     }
