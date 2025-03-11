@@ -129,3 +129,20 @@ exports.stop = async (req, res) => {
     return res.status(500).json({ message: "サーバーエラー", error: true });
   }
 };
+
+exports.forgotPassword = async (req, res) => {
+  try {
+    const user = await User.findOne({ email: req.body.email });
+    if (!user)
+      return res.json({ message: "ユーザーが見つかりません。", error: true });
+
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(req.body.password, salt);
+
+    await user.save();
+
+    return res.status(200).json({ message: "更新成功!" });
+  } catch (error) {
+    return res.status(500).json({ message: "サーバーエラー", error: true });
+  }
+};
