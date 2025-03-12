@@ -39,80 +39,41 @@ exports.createFacility = async (req, res) => {
 exports.getFacilities = async (req, res) => {
   try {
     const { jobType, facility, pref, employmentType } = req.query;
+    let filter = {};
 
     if (req.user.data.role === "customer") {
       const customer = await CustomerModel.findOne({
         customer_id: req.user.data.customer_id,
       });
 
+      if (!customer) {
+        return res
+          .status(404)
+          .json({ message: "顧客が見つかりません", error: true });
+      }
+
       const customers = await CustomerModel.find({
         companyName: customer.companyName,
       });
-      const customerIds = customers.map((customer) => customer.customer_id);
+
+      const customerIds = customers.map((cust) => cust.customer_id);
+      filter.customer_id = { $in: customerIds }; // Always include this condition
 
       if (Object.keys(req.query).length === 0) {
-        const facilities = await FacilityModel.find({
-          customer_id: { $in: customerIds },
-        });
+        const facilities = await FacilityModel.find(filter);
         return res
           .status(200)
           .json({ message: "施設取得成功", facility: facilities });
       }
-
-      let filter = {
-        customer_id: { $in: customerIds }, // Always include this condition when filters are applied
-      };
-      if (jobType) filter.job_type = { $in: [jobType] }; // Match jobType in the array
-      if (facility) filter.facility_genre = facility;
-      if (pref) filter.prefecture = pref;
-      filter.allowed === "allowed";
-
-      // Fetch facilities based on the dynamic filter
-      const facilities = await FacilityModel.find(filter);
-
-      // Fetch job posts for each facility
-      const facilitiesWithDetails = await Promise.all(
-        facilities.map(async (facility) => {
-          const jobPosts = await JobPostModel.find({
-            facility_id: facility.facility_id,
-            allowed: "allowed", // Only fetch allowed job posts
-          });
-
-          return {
-            ...facility.toObject(),
-            jobPosts, // Include filtered jobPosts data
-          };
-        })
-      );
-
-      // Filter facilities based on employmentType (if provided)
-      const filteredFacilities = employmentType
-        ? facilitiesWithDetails.filter((facility) =>
-            facility.jobPosts.some((jobpost) =>
-              jobpost.employment_type.includes(employmentType)
-            )
-          )
-        : facilitiesWithDetails;
-
-      res
-        .status(200)
-        .json({ message: "施設取得成功", facility: filteredFacilities });
     }
 
-    if (Object.keys(req.query).length === 0) {
-      const facilities = await FacilityModel.find({});
-      return res
-        .status(200)
-        .json({ message: "施設取得成功", facility: facilities });
-    }
-
-    let filter = {};
-    if (jobType) filter.job_type = { $in: [jobType] }; // Match jobType in the array
+    // Apply filters for all users (including customers)
+    if (jobType) filter.job_type = { $in: [jobType] };
     if (facility) filter.facility_genre = facility;
     if (pref) filter.prefecture = pref;
-    filter.allowed === "allowed";
+    filter.allowed = "allowed"; // Fix assignment
 
-    // Fetch facilities based on the dynamic filter
+    // Fetch facilities based on filters
     const facilities = await FacilityModel.find(filter);
 
     // Fetch job posts for each facility
@@ -125,7 +86,7 @@ exports.getFacilities = async (req, res) => {
 
         return {
           ...facility.toObject(),
-          jobPosts, // Include filtered jobPosts data
+          jobPosts, // Attach job posts to facility
         };
       })
     );
@@ -139,12 +100,12 @@ exports.getFacilities = async (req, res) => {
         )
       : facilitiesWithDetails;
 
-    res
+    return res
       .status(200)
       .json({ message: "施設取得成功", facility: filteredFacilities });
   } catch (error) {
-    console.error("Error fetching facilities:", error);
-    res.status(500).json({ message: "サーバーエラー", error: true });
+    console.error("❌ Error fetching facilities:", error);
+    return res.status(500).json({ message: "サーバーエラー", error: true });
   }
 };
 
