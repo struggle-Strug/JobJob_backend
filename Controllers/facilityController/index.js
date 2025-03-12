@@ -26,6 +26,7 @@ exports.createFacility = async (req, res) => {
       establishment_date: req.body.establishment_date,
       service_time: req.body.service_time,
       rest_day: req.body.rest_day,
+      allowed: "pending",
     });
 
     await newFacility.save();
