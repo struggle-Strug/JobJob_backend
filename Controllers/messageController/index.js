@@ -75,10 +75,10 @@ exports.getMine = async (req, res) => {
           jobpost_id: message.jobPost_id,
         });
         const facility = await FacilityModel.findOne({
-          facility_id: jobPost.facility_id,
+          facility_id: jobPost?.facility_id,
         });
         const customer = await CustomerModel.findOne({
-          customer_id: jobPost.customer_id,
+          customer_id: jobPost?.customer_id,
         });
         return {
           ...message.toObject(), // Convert MongoDB document to plain object
