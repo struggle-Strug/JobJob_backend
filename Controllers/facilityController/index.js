@@ -61,6 +61,7 @@ exports.getFacilities = async (req, res) => {
 
       let filter = {
         customer_id: { $in: customerIds }, // Always include this condition when filters are applied
+        allowed: "allowed", // Always include this condition when filters are applied
       };
       if (jobType) filter.job_type = { $in: [jobType] }; // Match jobType in the array
       if (facility) filter.facility_genre = facility;
