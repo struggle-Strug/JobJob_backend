@@ -2,6 +2,7 @@ const JobPostModel = require("../../Models/JobPostModel");
 const customerModel = require("../../Models/CustomerModel");
 const facilityModel = require("../../Models/FacilityModel");
 const sgMail = require("@sendgrid/mail");
+const MessageModel = require("../../Models/MessageModel");
 
 exports.createJobPost = async (req, res) => {
   try {
@@ -372,5 +373,39 @@ exports.getFilteredJobPosts = async (req, res) => {
     console.log(error);
 
     res.status(500).json({ message: "サーバーエラー", error: true });
+  }
+};
+
+exports.getAppliedJobPosts = async (req, res) => {
+  try {
+    // Get all messages where the user is either first or second
+    const myMessages = await MessageModel.find({
+      $or: [{ first: req.user.data._id }, { second: req.user.data._id }],
+      status: "応募済", // Filter directly in the DB instead of `.filter()`
+    });
+
+    // Extract jobPost IDs to fetch all at once
+    const jobPostIds = myMessages.map((msg) => msg.jobPost_id);
+
+    // Fetch all job posts in one query
+    const jobPosts = await JobPostModel.find({
+      jobpost_id: { $in: jobPostIds },
+    });
+
+    // Map job posts with their corresponding message
+    const jobPostsWithMessages = jobPosts.map((jobPost) => {
+      const message = myMessages.find(
+        (msg) => msg.jobPost_id.toString() === jobPost.jobpost_id.toString()
+      );
+      return { ...jobPost.toObject(), message }; // Convert jobPost to plain object
+    });
+
+    return res.json({
+      message: "取得成功",
+      jobPosts: jobPostsWithMessages,
+    });
+  } catch (error) {
+    console.error("❌ Error fetching applied job posts:", error);
+    return res.status(500).json({ message: "サーバーエラー", error: true });
   }
 };
