@@ -111,10 +111,22 @@ exports.getFacilities = async (req, res) => {
 
 exports.getAllFacilities = async (req, res) => {
   try {
-    const facilities = await FacilityModel.find()
-      .populate("customer_id")
-      .sort({ createdAt: -1 });
-    res.status(200).json({ message: "施設取得成功", facility: facilities });
+    const facilities = await FacilityModel.find().sort({ createdAt: -1 });
+
+    const facilitiesWithDetails = await Promise.all(
+      facilities.map(async (facility) => {
+        const customer = await CustomerModel.findOne({
+          customer_id: facility.customer_id,
+        });
+        return {
+          ...facility.toObject(),
+          customer_id: customer, // Attach job posts to facility
+        };
+      })
+    );
+    res
+      .status(200)
+      .json({ message: "施設取得成功", facility: facilitiesWithDetails });
   } catch (error) {
     res.status(500).json({ message: "サーバーエラー", error: true });
   }
