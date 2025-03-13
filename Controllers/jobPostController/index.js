@@ -3,16 +3,15 @@ const customerModel = require("../../Models/CustomerModel");
 const facilityModel = require("../../Models/FacilityModel");
 const sgMail = require("@sendgrid/mail");
 const MessageModel = require("../../Models/MessageModel");
+const JobType = require("../../utils/constants/jobtype");
 
 exports.createJobPost = async (req, res) => {
   try {
-    // ✅ Find the latest job post based on jobpost_id
-    const latestJobPost = await JobPostModel.findOne().sort({ jobpost_id: -1 });
+    const jobPosts = await JobPostModel.find({});
+    const lastJobPost = jobPosts[jobPosts.length - 1];
 
     // ✅ Determine the new jobpost_id
-    const newJobPostId = latestJobPost
-      ? Number(latestJobPost.jobpost_id) + 1
-      : 1;
+    const newJobPostId = lastJobPost ? Number(lastJobPost.jobpost_id) + 1 : 1;
 
     // ✅ Create new job post
     const newJobPost = new JobPostModel({
@@ -411,6 +410,42 @@ exports.getAppliedJobPosts = async (req, res) => {
     });
   } catch (error) {
     console.error("❌ Error fetching applied job posts:", error);
+    return res.status(500).json({ message: "サーバーエラー", error: true });
+  }
+};
+
+exports.getJobPostsNumbers = async (req, res) => {
+  try {
+    // ✅ Define all job types in a single array
+    const allJobTypeKeys = [
+      ...Object.keys(JobType["医科"] || {}),
+      ...Object.keys(JobType["歯科"] || {}),
+      ...Object.keys(JobType["介護"] || {}),
+      ...Object.keys(JobType["保育"] || {}),
+      ...Object.keys(JobType["その他"] || {}),
+      ...Object.keys(JobType["リハビリ／代替医療"] || {}),
+      ...Object.keys(JobType["ヘルスケア／美容"] || {}),
+    ];
+
+    // ✅ Use MongoDB aggregation to count job posts by type
+    const jobPostsCounts = await JobPostModel.aggregate([
+      { $match: { type: { $in: allJobTypeKeys } } }, // Match only known job types
+      { $group: { _id: "$type", count: { $sum: 1 } } }, // Count occurrences
+    ]);
+
+    // ✅ Convert aggregation result into an object
+    const JobPostsNumbers = allJobTypeKeys.reduce((acc, jobType) => {
+      acc[jobType] =
+        jobPostsCounts.find((entry) => entry._id === jobType)?.count || 0;
+      return acc;
+    }, {});
+
+    return res.json({
+      message: "取得成功",
+      JobPostsNumbers: JobPostsNumbers,
+    });
+  } catch (error) {
+    console.error("❌ Error fetching job post numbers:", error);
     return res.status(500).json({ message: "サーバーエラー", error: true });
   }
 };
