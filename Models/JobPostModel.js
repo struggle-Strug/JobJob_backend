@@ -10,7 +10,7 @@ const JobPostSchema = new mongoose.Schema({
     required: true,
   },
   jobpost_id: {
-    type: String,
+    type: Number,
     required: true,
   },
   type: {
