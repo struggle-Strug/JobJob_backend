@@ -6,14 +6,19 @@ const MessageModel = require("../../Models/MessageModel");
 
 exports.createJobPost = async (req, res) => {
   try {
-    const jobposts = await JobPostModel.find({});
+    // ✅ Find the latest job post based on jobpost_id
+    const latestJobPost = await JobPostModel.findOne().sort({ jobpost_id: -1 });
+
+    // ✅ Determine the new jobpost_id
+    const newJobPostId = latestJobPost
+      ? Number(latestJobPost.jobpost_id) + 1
+      : 1;
+
+    // ✅ Create new job post
     const newJobPost = new JobPostModel({
       facility_id: req.body.facility_id,
       customer_id: req.body.customer_id,
-      jobpost_id:
-        jobposts.length === 0
-          ? 1
-          : jobposts[jobposts.length - 1].jobpost_id + 1,
+      jobpost_id: newJobPostId, // ✅ Correctly assigned unique ID
       type: req.body.type,
       picture: req.body.picture,
       sub_title: req.body.sub_title,
@@ -49,6 +54,7 @@ exports.createJobPost = async (req, res) => {
       .status(200)
       .json({ message: "求人を登録しました。", jobpost: newJobPost });
   } catch (error) {
+    console.error("❌ Error creating job post:", error);
     res.status(500).json({ message: "サーバーエラー", error: true });
   }
 };
@@ -57,15 +63,18 @@ exports.createJobPostByCopy = async (req, res) => {
   try {
     const jobPost_id = req.params.id;
     const jobPost = await JobPostModel.findOne({ jobpost_id: jobPost_id });
-    const jobPosts = await JobPostModel.find();
+    // ✅ Find the latest job post based on jobpost_id
+    const latestJobPost = await JobPostModel.findOne().sort({ jobpost_id: -1 });
+
+    // ✅ Determine the new jobpost_id
+    const newJobPostId = latestJobPost
+      ? Number(latestJobPost.jobpost_id) + 1
+      : 1;
     // Create a new job post instance
     const newJobPost = new JobPostModel({
       facility_id: jobPost.facility_id,
       customer_id: req.user.data.customer_id,
-      jobpost_id:
-        jobPosts.length === 0
-          ? 1
-          : jobPosts[jobPosts.length - 1].jobpost_id + 1,
+      jobpost_id: newJobPostId,
       type: jobPost.type,
       picture: jobPost.picture,
       sub_title: jobPost.sub_title,
@@ -122,7 +131,6 @@ exports.updateJobPost = async (req, res) => {
 exports.getJobPostById = async (req, res) => {
   try {
     const jobPost = await JobPostModel.findOne({ jobpost_id: req.params.id });
-
     if (!jobPost) {
       return res
         .status(404)
@@ -188,7 +196,6 @@ exports.getJobPostByFacilityId = async (req, res) => {
 exports.getJobPosts = async (req, res) => {
   try {
     const jobPosts = await JobPostModel.find({}).sort({ created_at: -1 });
-
     // Resolve customer and facility data
     const jobPostsWithDetails = await Promise.all(
       jobPosts.map(async (jobpost) => {
@@ -216,7 +223,6 @@ exports.updateJobPostStatus = async (req, res) => {
   try {
     const jobPost = await JobPostModel.findOne({ jobpost_id: req.params.id });
     jobPost.allowed = req.params.status;
-
     await jobPost.save();
 
     const customer = await customerModel.findOne({
@@ -383,7 +389,6 @@ exports.getAppliedJobPosts = async (req, res) => {
       $or: [{ first: req.user.data._id }, { second: req.user.data._id }],
       status: "応募済", // Filter directly in the DB instead of `.filter()`
     });
-
     // Extract jobPost IDs to fetch all at once
     const jobPostIds = myMessages.map((msg) => msg.jobPost_id);
 
