@@ -2,8 +2,8 @@ const router = require("express").Router();
 const jobPostController = require("../Controllers/jobPostController");
 const requireAuth = require("../Middleware/RequireAuth");
 
-router.post("/:id/:status", requireAuth, jobPostController.updateJobPostStatus);
 router.post("/copy/:id", requireAuth, jobPostController.createJobPostByCopy);
+router.post("/:id/:status", requireAuth, jobPostController.updateJobPostStatus);
 router.post("/filter", jobPostController.getFilteredJobPosts);
 router.put("/:id", requireAuth, jobPostController.updateJobPost);
 router.post("/", requireAuth, jobPostController.createJobPost);

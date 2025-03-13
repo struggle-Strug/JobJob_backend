@@ -10,7 +10,7 @@ router.post(
 );
 router.put("/:id", requireAuth, facilityController.updateFacility);
 router.delete("/:id", requireAuth, facilityController.deleteFacility);
-router.get("/getByCompany", requireAuth, facilityController.getAllFacilities);
+router.get("/getByCompany", requireAuth, facilityController.getByCompany);
 router.get("/all", requireAuth, facilityController.getAllFacilities);
 router.get("/:id", requireAuth, facilityController.getFacility);
 router.get("/", requireAuth, facilityController.getFacilities);
