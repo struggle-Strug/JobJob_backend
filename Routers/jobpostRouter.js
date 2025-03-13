@@ -9,6 +9,7 @@ router.put("/:id", requireAuth, jobPostController.updateJobPost);
 router.post("/", requireAuth, jobPostController.createJobPost);
 router.post("/favouriteorrecent", requireAuth, jobPostController.getFavourites);
 router.get("/facility/:id", jobPostController.getJobPostByFacilityId);
+router.get("/number", jobPostController.getJobPostsNumbers);
 router.get("/applied", requireAuth, jobPostController.getAppliedJobPosts);
 router.get("/:id", jobPostController.getJobPostById);
 router.get("/", requireAuth, jobPostController.getJobPosts);
