@@ -130,9 +130,7 @@ exports.getById = async (req, res) => {
     // ✅ Fetch message by ID
     const message = await MessageModel.findOne({ message_id: id }).lean();
     if (!message) {
-      return res
-        .status(404)
-        .json({ message: "メッセージが見つかりません。", error: true });
+      return res.json({ message: "メッセージが見つかりません。", error: true });
     }
 
     // ✅ Fetch jobPost if message exists
@@ -140,9 +138,7 @@ exports.getById = async (req, res) => {
       jobpost_id: message.jobPost_id,
     }).lean();
     if (!jobPost) {
-      return res
-        .status(404)
-        .json({ message: "求人情報が見つかりません。", error: true });
+      return res.json({ message: "求人情報が見つかりません。", error: true });
     }
 
     // ✅ Fetch facility and customer if jobPost exists
@@ -419,9 +415,7 @@ exports.getByCompany = async (req, res) => {
 
     // ✅ Ensure customerIds is not empty before querying messages
     if (customerIds.length === 0) {
-      return res
-        .status(404)
-        .json({ message: "この会社には顧客が見つかりません。" });
+      return res.json({ message: "この会社には顧客が見つかりません。" });
     }
 
     // ✅ Retrieve messages where 'second' is in customerIds
@@ -431,7 +425,7 @@ exports.getByCompany = async (req, res) => {
 
     // ✅ If no messages found, return a proper response
     if (messages.length === 0) {
-      return res.status(404).json({ message: "メッセージが見つかりません。" });
+      return res.json({ message: "メッセージが見つかりません。" });
     }
 
     // ✅ Fetch jobPost, facility, customer, and user in parallel to improve performance
@@ -478,9 +472,7 @@ exports.getCertainMessageByCompany = async (req, res) => {
     // ✅ Fetch the specific message by ID
     const certainMessage = await MessageModel.findById(id).lean();
     if (!certainMessage) {
-      return res
-        .status(404)
-        .json({ message: "メッセージが見つかりません。", error: true });
+      return res.json({ message: "メッセージが見つかりません。", error: true });
     }
 
     // ✅ Fetch jobPost related to the message
@@ -488,9 +480,7 @@ exports.getCertainMessageByCompany = async (req, res) => {
       jobpost_id: certainMessage.jobPost_id,
     }).lean();
     if (!jobPost) {
-      return res
-        .status(404)
-        .json({ message: "求人情報が見つかりません。", error: true });
+      return res.json({ message: "求人情報が見つかりません。", error: true });
     }
 
     // ✅ Fetch facility, customer, and user related to the jobPost
