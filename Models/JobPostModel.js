@@ -18,7 +18,7 @@ const JobPostSchema = new mongoose.Schema({
     required: true,
   },
   picture: {
-    type: String,
+    type: [String],
   },
   sub_title: {
     type: String,
