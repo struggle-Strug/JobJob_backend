@@ -34,7 +34,7 @@ const FacilitySchema = new mongoose.Schema({
     // required: true,
   },
   photo: {
-    type: String,
+    type: [String],
   },
   introduction: {
     type: String,
