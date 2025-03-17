@@ -346,45 +346,60 @@ exports.getAllByStatus = async (req, res) => {
   try {
     const status = req.params.status;
 
-    const messages = await MessageModel.find({});
+    // ✅ Fetch all messages
+    const messages = await MessageModel.find({}).lean();
 
+    // ✅ Fix status filtering
     let filteredMessages;
     if (status === "allOnGoings") {
       filteredMessages = messages;
     } else if (status === "allEnds") {
-      filteredMessages = messages?.filter(
-        (message) =>
-          message.status === ("入職済" || "不採用" || "内定辞退" || "選考終了")
+      const endStatuses = ["入職済", "不採用", "内定辞退", "選考終了"];
+      filteredMessages = messages.filter((message) =>
+        endStatuses.includes(message.status)
       );
     } else {
-      filteredMessages = messages?.filter(
+      filteredMessages = messages.filter(
         (message) => message.status === status
       );
     }
 
+    // ✅ Fetch jobPost, facility, and user in parallel to improve performance
     const processes = await Promise.all(
       filteredMessages.map(async (message) => {
+        // ✅ Fetch jobPost
         const jobPost = await JobPostModel.findOne({
           jobpost_id: message.jobPost_id,
-        });
-        const facility = await FacilityModel.findOne({
-          facility_id: jobPost.facility_id,
-        });
-        const user_id = message.content[0].sender;
-        const user = await UserModel.findOne({ _id: user_id });
+        }).lean();
+        if (!jobPost) return null; // ❌ Skip if jobPost is missing
+
+        // ✅ Fetch facility
+        const facility =
+          (await FacilityModel.findOne({
+            facility_id: jobPost.facility_id,
+          }).lean()) || null;
+
+        // ✅ Ensure content exists before accessing sender
+        const user_id =
+          message.content?.length > 0 ? message.content[0].sender : null;
+        const user = user_id
+          ? await UserModel.findOne({ _id: user_id }).lean()
+          : null;
+
         return {
-          ...message.toObject(), // Convert MongoDB document to plain object
-          facility_id: facility, // Include facility data
+          ...message, // ✅ Already a plain object from `.lean()`
+          facility_id: facility,
           jobpost_id: jobPost,
-          user_id: user, // Include user data
+          user_id: user,
         };
       })
     );
 
-    res.json({ processes: processes });
+    // ✅ Remove null values to prevent errors
+    res.json({ processes: processes.filter(Boolean) });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "サーバーエラー", error: true });
+    console.error("❌ Error fetching messages by status:", error);
+    return res.status(500).json({ message: "サーバーエラー", error: true });
   }
 };
 
