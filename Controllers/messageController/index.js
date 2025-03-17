@@ -126,29 +126,46 @@ exports.getAllMessages = async (req, res) => {
 exports.getById = async (req, res) => {
   try {
     const id = req.params.id;
-    const message = await MessageModel.findOne({ message_id: id });
 
+    // ✅ Fetch message by ID
+    const message = await MessageModel.findOne({ message_id: id }).lean();
+    if (!message) {
+      return res
+        .status(404)
+        .json({ message: "メッセージが見つかりません。", error: true });
+    }
+
+    // ✅ Fetch jobPost if message exists
     const jobPost = await JobPostModel.findOne({
       jobpost_id: message.jobPost_id,
-    });
-    const facility = await FacilityModel.findOne({
-      facility_id: jobPost.facility_id,
-    });
-    const customer = await CustomerModel.findOne({
-      customer_id: jobPost.customer_id,
-    });
+    }).lean();
+    if (!jobPost) {
+      return res
+        .status(404)
+        .json({ message: "求人情報が見つかりません。", error: true });
+    }
 
-    res.json({
+    // ✅ Fetch facility and customer if jobPost exists
+    const facility =
+      (await FacilityModel.findOne({
+        facility_id: jobPost.facility_id,
+      }).lean()) || null;
+    const customer =
+      (await CustomerModel.findOne({
+        customer_id: jobPost.customer_id,
+      }).lean()) || null;
+
+    return res.json({
       message: {
-        ...message.toObject(),
+        ...message,
         customer_id: customer,
         facility_id: facility,
         jobpost_id: jobPost,
       },
     });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "サーバーエラー", error: true });
+    console.error("❌ Error fetching message by ID:", error);
+    return res.status(500).json({ message: "サーバーエラー", error: true });
   }
 };
 
@@ -176,9 +193,11 @@ exports.send = async (req, res) => {
 
 exports.getJobNumbersByStatus = async (req, res) => {
   try {
-    const messages = await MessageModel.find({
-      $or: [{ first: req.user.data._id }, { second: req.user.data._id }],
-    });
+    const companyName = req.user.data.companyName;
+    const customers = await CustomerModel.find({ companyName: companyName });
+    const customerIds = customers.map((cl) => cl._id);
+    const messages = await MessageModel.find({ second: { $in: customerIds } });
+
     const jobNumbers = {
       allOnGoings: messages?.filter(
         (message) =>
@@ -226,7 +245,7 @@ exports.getJobNumbersByStatus = async (req, res) => {
 
 exports.getAllJobNumbersByStatus = async (req, res) => {
   try {
-    const messages = await MessageModel.find({});
+    const messages = await MessageModel.find();
     const jobNumbers = {
       allOnGoings: messages?.filter(
         (message) =>
@@ -271,52 +290,58 @@ exports.getAllJobNumbersByStatus = async (req, res) => {
     res.status(500).json({ message: "サーバーエラー", error: true });
   }
 };
-
 exports.getByStatus = async (req, res) => {
   try {
     const id = req.params.id;
     const status = req.params.status;
 
+    // ✅ Fetch messages for user
     const messages = await MessageModel.find({
       $or: [{ first: id }, { second: id }],
     });
 
+    // ✅ Fix status filtering
     let filteredMessages;
     if (status === "allOnGoings") {
       filteredMessages = messages;
     } else if (status === "allEnds") {
-      filteredMessages = messages?.filter(
-        (message) =>
-          message.status === ("入職済" || "不採用" || "内定辞退" || "選考終了")
+      const endStatuses = ["入職済", "不採用", "内定辞退", "選考終了"];
+      filteredMessages = messages.filter((message) =>
+        endStatuses.includes(message.status)
       );
     } else {
-      filteredMessages = messages?.filter(
+      filteredMessages = messages.filter(
         (message) => message.status === status
       );
     }
 
+    // ✅ Fetch jobPost, facility, and user in parallel to improve performance
     const processes = await Promise.all(
       filteredMessages.map(async (message) => {
         const jobPost = await JobPostModel.findOne({
           jobpost_id: message.jobPost_id,
-        });
+        }).lean();
+        if (!jobPost) return null; // Skip if job post is missing
+
         const facility = await FacilityModel.findOne({
           facility_id: jobPost.facility_id,
-        });
+        }).lean();
         const user_id = message.first === id ? message.second : message.first;
-        const user = await UserModel.findOne({ _id: user_id });
+        const user = await UserModel.findOne({ _id: user_id }).lean();
+
         return {
           ...message.toObject(), // Convert MongoDB document to plain object
-          facility_id: facility, // Include facility data
-          jobpost_id: jobPost,
-          user_id: user, // Include user data
+          facility_id: facility || null, // Include facility data (or null if not found)
+          jobpost_id: jobPost || null, // Include job post data (or null if not found)
+          user_id: user || null, // Include user data (or null if not found)
         };
       })
     );
 
-    res.json({ processes: processes });
+    // ✅ Remove null values (when jobPost is missing)
+    res.json({ processes: processes.filter((p) => p !== null) });
   } catch (error) {
-    console.log(error);
+    console.error("❌ Error in getByStatus:", error);
     res.status(500).json({ message: "サーバーエラー", error: true });
   }
 };
@@ -379,5 +404,119 @@ exports.updateMessage = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "サーバーエラー", error: true });
+  }
+};
+
+exports.getByCompany = async (req, res) => {
+  try {
+    const companyName = req.user.data.companyName;
+
+    // ✅ Fetch all customers belonging to the company
+    const customers = await CustomerModel.find({ companyName: companyName });
+
+    // ✅ Extract customer IDs
+    const customerIds = customers.map((cl) => cl._id);
+
+    // ✅ Ensure customerIds is not empty before querying messages
+    if (customerIds.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "この会社には顧客が見つかりません。" });
+    }
+
+    // ✅ Retrieve messages where 'second' is in customerIds
+    const messages = await MessageModel.find({
+      second: { $in: customerIds },
+    }).sort({ created_at: -1 });
+
+    // ✅ If no messages found, return a proper response
+    if (messages.length === 0) {
+      return res.status(404).json({ message: "メッセージが見つかりません。" });
+    }
+
+    // ✅ Fetch jobPost, facility, customer, and user in parallel to improve performance
+    const messagesWithDetails = await Promise.all(
+      messages.map(async (message) => {
+        const jobPost = await JobPostModel.findOne({
+          jobpost_id: message.jobPost_id,
+        }).lean();
+        if (!jobPost) return null; // ❌ Skip if jobPost is missing
+
+        const facility = await FacilityModel.findOne({
+          facility_id: jobPost.facility_id,
+        }).lean();
+        const customer = await CustomerModel.findOne({
+          customer_id: jobPost.customer_id,
+        }).lean();
+        const user = await UserModel.findOne({ _id: message.first }).lean();
+
+        return {
+          ...message.toObject(), // Convert MongoDB document to plain object
+          facility_id: facility || null, // ✅ Include facility data (or null if not found)
+          jobpost_id: jobPost || null, // ✅ Include job post data (or null if not found)
+          customer_id: customer || null, // ✅ Include customer data (or null if not found)
+          user_id: user || null, // ✅ Include user data (or null if not found)
+        };
+      })
+    );
+
+    // ✅ Remove null values to prevent errors
+    return res.json({
+      message: "取得成功",
+      messages: messagesWithDetails.filter(Boolean),
+    });
+  } catch (error) {
+    console.error("❌ Error fetching messages by company:", error);
+    return res.status(500).json({ message: "サーバーエラー", error: true });
+  }
+};
+
+exports.getCertainMessageByCompany = async (req, res) => {
+  try {
+    const id = req.params.id;
+
+    // ✅ Fetch the specific message by ID
+    const certainMessage = await MessageModel.findById(id).lean();
+    if (!certainMessage) {
+      return res
+        .status(404)
+        .json({ message: "メッセージが見つかりません。", error: true });
+    }
+
+    // ✅ Fetch jobPost related to the message
+    const jobPost = await JobPostModel.findOne({
+      jobpost_id: certainMessage.jobPost_id,
+    }).lean();
+    if (!jobPost) {
+      return res
+        .status(404)
+        .json({ message: "求人情報が見つかりません。", error: true });
+    }
+
+    // ✅ Fetch facility, customer, and user related to the jobPost
+    const facility =
+      (await FacilityModel.findOne({
+        facility_id: jobPost.facility_id,
+      }).lean()) || null;
+    const customer =
+      (await CustomerModel.findOne({
+        customer_id: jobPost.customer_id,
+      }).lean()) || null;
+    const user =
+      (await UserModel.findOne({ _id: certainMessage.first }).lean()) || null;
+
+    return res.json({
+      message: "取得成功",
+      messageDetails: {
+        ...certainMessage,
+        facility_id: facility,
+        jobpost_id: jobPost,
+        customer_id: customer,
+        user_id: user,
+      },
+    });
+  } catch (error) {
+    console.error("❌ Error fetching certain message by company:", error);
+    return res.status(500).json({ message: "サーバーエラー", error: true });
   }
 };
