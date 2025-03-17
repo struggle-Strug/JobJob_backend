@@ -62,13 +62,11 @@ exports.createJobPostByCopy = async (req, res) => {
   try {
     const jobPost_id = req.params.id;
     const jobPost = await JobPostModel.findOne({ jobpost_id: jobPost_id });
-    // ✅ Find the latest job post based on jobpost_id
-    const latestJobPost = await JobPostModel.findOne().sort({ jobpost_id: -1 });
+    const jobPosts = await JobPostModel.find({});
+    const lastJobPost = jobPosts[jobPosts.length - 1];
 
     // ✅ Determine the new jobpost_id
-    const newJobPostId = latestJobPost
-      ? Number(latestJobPost.jobpost_id) + 1
-      : 1;
+    const newJobPostId = lastJobPost ? Number(lastJobPost.jobpost_id) + 1 : 1;
     // Create a new job post instance
     const newJobPost = new JobPostModel({
       facility_id: jobPost.facility_id,
@@ -427,10 +425,10 @@ exports.getJobPostsNumbers = async (req, res) => {
       ...Object.keys(JobType["ヘルスケア／美容"] || {}),
     ];
 
-    // ✅ Use MongoDB aggregation to count job posts by type
+    // ✅ Use MongoDB aggregation to count job posts by type (only allowed job posts)
     const jobPostsCounts = await JobPostModel.aggregate([
-      { $match: { type: { $in: allJobTypeKeys } } }, // Match only known job types
-      { $group: { _id: "$type", count: { $sum: 1 } } }, // Count occurrences
+      { $match: { type: { $in: allJobTypeKeys }, allowed: "allowed" } }, // ✅ Add `allowed: "allowed"` condition
+      { $group: { _id: "$type", count: { $sum: 1 } } }, // ✅ Count occurrences per type
     ]);
 
     // ✅ Convert aggregation result into an object
