@@ -12,6 +12,12 @@ router.get(
   messageController.getAllJobNumbersByStatus
 );
 router.get("/jobNumbers", requireAuth, messageController.getJobNumbersByStatus);
+router.get(
+  "/company/:id",
+  requireAuth,
+  messageController.getCertainMessageByCompany
+);
+router.get("/company", requireAuth, messageController.getByCompany);
 router.get("/detail/:id", requireAuth, messageController.getById);
 router.get("/:id/:status", requireAuth, messageController.getByStatus);
 router.get("/:status", requireAuth, messageController.getAllByStatus);
