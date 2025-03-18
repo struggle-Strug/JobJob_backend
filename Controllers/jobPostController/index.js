@@ -273,7 +273,7 @@ http://142.132.202.228:3000/customers/contact/
         <p>件名：［ジョブジョブ］施設申請の審査結果</p>
         <p>この度はジョブジョブへの施設情報を登録いただき誠にありがとうございます。</p>
         <p>対象施設：<strong>${facility.name}</strong>。</p>
-        <p>職種<strong>${jobPost.type}</strong>。</p>
+        <p>職種：<strong>${jobPost.type}</strong>。</p>
         <p>タイトル：<strong>${jobPost.sub_title}</strong>。</p>
         <p>ジョブジョブ運営事務局にて内容確認のうえ掲載を開始致しました。</p>
         <p>掲載ページはこちらからご確認ください。</p>
@@ -331,7 +331,7 @@ http://142.132.202.228:3000/customers/contact/
               <p>件名：［ジョブジョブ］施設申請の審査結果</p>
               <p>この度はジョブジョブへの施設情報を登録いただき誠にありがとうございます。</p>
               <p>対象施設：<strong>${facility.name}</strong>。</p>
-              <p>職種<strong>${jobPost.type}</strong>。</p>
+              <p>職種：<strong>${jobPost.type}</strong>。</p>
               <p>タイトル：<strong>${jobPost.sub_title}</strong>。</p>
               <p>ジョブジョブ運営事務局にて内容確認させていただいたところ、不適切な表現や情報が含まれておりますため差し戻しとさせていただきます。</p>
               <p>お手数ですが、下記よりログインのうえ施設情報を修正いただき再度申請をお願いします。</p>
