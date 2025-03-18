@@ -8,6 +8,7 @@ router.post("/filter", jobPostController.getFilteredJobPosts);
 router.put("/:id", requireAuth, jobPostController.updateJobPost);
 router.post("/", requireAuth, jobPostController.createJobPost);
 router.post("/favouriteorrecent", requireAuth, jobPostController.getFavourites);
+router.delete("/:id", requireAuth, jobPostController.deleteJobPost);
 router.get("/facility/:id", jobPostController.getJobPostByFacilityId);
 router.get("/number", jobPostController.getJobPostsNumbers);
 router.get("/applied", requireAuth, jobPostController.getAppliedJobPosts);
