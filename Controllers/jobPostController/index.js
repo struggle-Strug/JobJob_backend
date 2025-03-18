@@ -44,6 +44,7 @@ exports.createJobPost = async (req, res) => {
       qualification_other: req.body.qualification_other,
       qualification_content: req.body.qualification_content,
       qualification_welcome: req.body.qualification_welcome,
+      allowed: req.body.allowed,
       process: req.body.process,
       registered_at: "",
     });
@@ -544,5 +545,20 @@ exports.getJobPostsNumbers = async (req, res) => {
   } catch (error) {
     console.error("❌ Error fetching job post numbers:", error);
     return res.status(500).json({ message: "サーバーエラー", error: true });
+  }
+};
+
+exports.deleteJobPost = async (req, res) => {
+  try {
+    const jobPost = await JobPostModel.findOneAndDelete({
+      jobpost_id: req.params.id,
+    });
+    if (!jobPost)
+      return res
+        .status(404)
+        .json({ message: "求人が見つかりません", error: true });
+    res.status(200).json({ message: "求人削除成功" });
+  } catch (error) {
+    res.status(500).json({ message: "サーバーエラー", error: true });
   }
 };
