@@ -154,6 +154,35 @@ exports.getFacility = async (req, res) => {
   }
 };
 
+exports.getPendingFacilities = async (req, res) => {
+  try {
+    const facilities = await FacilityModel.find({ allowed: "pending" }).sort({
+      createdAt: -1,
+    });
+
+    const facilitiesWithDetails = await Promise.all(
+      facilities.map(async (facility) => {
+        const customer = await CustomerModel.findOne({
+          customer_id: facility.customer_id,
+        });
+        const jobposts = await JobPostModel.find({
+          facility_id: facility.facility_id,
+        });
+        return {
+          ...facility.toObject(),
+          customer_id: customer, // Attach job posts to facility
+          jobPosts: jobposts,
+        };
+      })
+    );
+    res
+      .status(200)
+      .json({ message: "施設取得成功", facility: facilitiesWithDetails });
+  } catch (error) {
+    res.status(500).json({ message: "サーバーエラー", error: true });
+  }
+};
+
 exports.updateFacilityStatus = async (req, res) => {
   try {
     const facility = await FacilityModel.findOne({
