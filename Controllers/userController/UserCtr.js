@@ -21,7 +21,7 @@ exports.register = async (req, res) => {
     const msg = {
       to: req.body.email,
       from: "huskar020911@gmail.com", // Must be a verified sender on SendGrid
-      subject: "施設審査結果",
+      subject: "会員登録完了",
       text: `差出人：ジョブジョブ運営事務局
     FROM：noreply@jobjob-jp.com
     件名：新規会員登録完了のお知らせ
