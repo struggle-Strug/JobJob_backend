@@ -73,3 +73,25 @@ exports.updateDescription = async (req, res) => {
     return res.status(500).json({ message: "サーバーエラー", error: true });
   }
 };
+
+exports.updateImages = async (req, res) => {
+  try {
+    const photos = await PhotoModel.findOne({
+      customer_id: req.user.data.customer_id,
+    });
+
+    photos.images = [
+      ...photos.images,
+      ...req.body.map((image) => ({
+        photoName: image.fileName,
+        photoUrl: image.fileUrl,
+        description: "",
+      })),
+    ];
+    await photos.save();
+
+    return res.json({ message: "写真を削除しました", photos });
+  } catch (error) {
+    return res.status(500).json({ message: "サーバーエラー", error: true });
+  }
+};
