@@ -41,32 +41,6 @@ exports.getFacilities = async (req, res) => {
     const { jobType, facility, pref, employmentType } = req.query;
     let filter = {};
 
-    if (req.user.data.role === "customer") {
-      const customer = await CustomerModel.findOne({
-        customer_id: req.user.data.customer_id,
-      });
-
-      if (!customer) {
-        return res
-          .status(404)
-          .json({ message: "顧客が見つかりません", error: true });
-      }
-
-      const customers = await CustomerModel.find({
-        companyName: customer.companyName,
-      });
-
-      const customerIds = customers.map((cust) => cust.customer_id);
-      filter.customer_id = { $in: customerIds }; // Always include this condition
-
-      if (Object.keys(req.query).length === 0) {
-        const facilities = await FacilityModel.find(filter);
-        return res
-          .status(200)
-          .json({ message: "施設取得成功", facility: facilities });
-      }
-    }
-
     // Apply filters for all users (including customers)
     if (jobType) filter.job_type = { $in: [jobType] };
     if (facility) filter.facility_genre = facility;
@@ -106,6 +80,42 @@ exports.getFacilities = async (req, res) => {
   } catch (error) {
     console.error("❌ Error fetching facilities:", error);
     return res.status(500).json({ message: "サーバーエラー", error: true });
+  }
+};
+
+exports.getCustomerFacilties = async (req, res) => {
+  try {
+    let filter = {};
+
+    if (req.user.data.role === "customer") {
+      const customer = await CustomerModel.findOne({
+        customer_id: req.user.data.customer_id,
+      });
+
+      if (!customer) {
+        return res
+          .status(404)
+          .json({ message: "顧客が見つかりません", error: true });
+      }
+
+      const customers = await CustomerModel.find({
+        companyName: customer.companyName,
+      });
+
+      const customerIds = customers.map((cust) => cust.customer_id);
+      filter.customer_id = { $in: customerIds }; // Always include this condition
+
+      if (Object.keys(req.query).length === 0) {
+        const facilities = await FacilityModel.find(filter);
+        return res
+          .status(200)
+          .json({ message: "施設取得成功", facility: facilities });
+      }
+    }
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({ message: "サーバーエラー", error: true });
   }
 };
 
