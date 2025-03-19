@@ -1,9 +1,10 @@
 const router = require("express").Router();
-const requireAuth = require("../middleware/requireAuth");
+const requireAuth = require("../Middleware/RequireAuth");
 
 const photoController = require("../Controllers/photoController/index");
 
 router.post("/", requireAuth, photoController.save);
+router.put("/image", requireAuth, photoController.updateImages);
 router.put("/:id", requireAuth, photoController.updateDescription);
 router.get("/", requireAuth, photoController.getPhotosByCustomerId);
 
