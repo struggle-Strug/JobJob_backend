@@ -1,10 +1,13 @@
 const User = require("../../Models/UserModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const sgMail = require("@sendgrid/mail");
 
 exports.register = async (req, res) => {
   try {
     const user = await User.findOne({ email: req.body.email });
+    // Set your SendGrid API key
+    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
     if (user) {
       return res.json({ message: "既に登録済みのユーザーです。", error: true });
     }
@@ -14,6 +17,61 @@ exports.register = async (req, res) => {
     newUser.password = await bcrypt.hash(req.body.password, salt);
 
     await newUser.save();
+
+    const msg = {
+      to: customer.email,
+      from: "huskar020911@gmail.com", // Must be a verified sender on SendGrid
+      subject: "施設審査結果",
+      text: `差出人：ジョブジョブ運営事務局
+    FROM：noreply@jobjob-jp.com
+    件名：新規会員登録完了のお知らせ
+    
+    この度はジョブジョブに会員登録いただき誠にありがとうございます。
+    
+    ID：${req.body.email}。
+    パスワード：${req.body.password}。
+    
+    求人検索はこちら
+    http://142.132.202.228:3000/
+    マイページはこちら
+    http://142.132.202.228:3000/members/mypage
+    
+    本メールの送信アドレスは送信専用です。
+    本メールに直接ご返信いただいてもご対応できかねますので、ご注意願います。
+    
+    当メールに関するお問い合わせについては下記へご連絡ください。
+    
+    ----------------------------------------------------------------------
+    【お問い合わせ先】
+    ジョブジョブ運営事務局
+    お問い合わせフォーム
+    http://142.132.202.228:3000/customers/contact/
+    ----------------------------------------------------------------------
+    `,
+      html: `
+            <p>差出人：ジョブジョブ運営事務局</p>
+            <p>FROM：noreply@jobjob-jp.com</p>
+            <p>件名：新規会員登録完了のお知らせ</p>
+            <p>この度はジョブジョブに会員登録いただき誠にありがとうございます。</p>
+            <p>ID：<strong>${req.body.email}</strong>。</p>
+            <p>パスワード：<strong>${req.body.password}</strong>。</p>
+            <p>求人検索はこちら</p>
+            <p><a href="http://142.132.202.228:3000/" target="_blank">http://142.132.202.228:3000/</a></p>
+            <p>マイページはこちら</p>
+            <p><a href="http://142.132.202.228:3000/members/mypage" target="_blank">http://142.132.202.228:3000/members/mypage</a></p>
+            <br/>
+            <p>本メールの送信アドレスは送信専用です。</p>
+            <p>本メールに直接ご返信いただいてもご対応できかねますので、ご注意願います。</p>
+            <br/>
+            <p>当メールに関するお問い合わせについては下記へご連絡ください。</p>
+            <hr>
+            <p><strong>【お問い合わせ先】</strong></p>
+            <p>ジョブジョブ運営事務局</p>
+            <p>お問い合わせフォーム</p>
+            <p><a href="http://142.132.202.228:3000/customers/contact/" target="_blank">http://142.132.202.228:3000/customers/contact/</a></p>`,
+    };
+
+    await sgMail.send(msg);
     return res.status(201).json({ message: "登録成功!", user: newUser });
   } catch (error) {
     return res.status(500).json({ message: "サーバーエラー", error: true });
