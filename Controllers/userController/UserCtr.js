@@ -19,7 +19,7 @@ exports.register = async (req, res) => {
     await newUser.save();
 
     const msg = {
-      to: customer.email,
+      to: req.body.email,
       from: "huskar020911@gmail.com", // Must be a verified sender on SendGrid
       subject: "施設審査結果",
       text: `差出人：ジョブジョブ運営事務局
