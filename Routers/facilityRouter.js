@@ -12,8 +12,9 @@ router.put("/:id", requireAuth, facilityController.updateFacility);
 router.delete("/:id", requireAuth, facilityController.deleteFacility);
 router.get("/getByCompany", requireAuth, facilityController.getByCompany);
 router.get("/request", requireAuth, facilityController.getPendingFacilities);
-router.get("/all", requireAuth, facilityController.getAllFacilities);
-router.get("/:id", requireAuth, facilityController.getFacility);
-router.get("/", requireAuth, facilityController.getFacilities);
+router.get("/customer", requireAuth, facilityController.getCustomerFacilties);
+router.get("/all", facilityController.getAllFacilities);
+router.get("/:id", facilityController.getFacility);
+router.get("/", facilityController.getFacilities);
 
 module.exports = router;
