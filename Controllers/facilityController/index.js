@@ -6,9 +6,13 @@ const sgMail = require("@sendgrid/mail");
 exports.createFacility = async (req, res) => {
   try {
     const allFacilities = await FacilityModel.find();
+    const lastFacility = allFacilities[allFacilities.length - 1];
+    const newFacilityId = lastFacility
+      ? Number(lastFacility.facility_id) + 1
+      : 1;
     const newFacility = new FacilityModel({
       customer_id: req.body.customer_id,
-      facility_id: allFacilities.length + 1,
+      facility_id: newFacilityId,
       name: req.body.name,
       postal_code: req.body.postal_code,
       prefecture: req.body.prefecture,

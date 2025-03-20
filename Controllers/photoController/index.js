@@ -92,6 +92,8 @@ exports.updateImages = async (req, res) => {
 
     return res.json({ message: "写真を削除しました", photos });
   } catch (error) {
+    console.log(error);
+
     return res.status(500).json({ message: "サーバーエラー", error: true });
   }
 };
