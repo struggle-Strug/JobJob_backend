@@ -13,5 +13,7 @@ router.post("/forgot-password", UserCtr.forgotPassword);
 router.post("/", UserCtr.register);
 router.get("/tokenlogin", requireAuth, UserCtr.tokenlogin);
 router.get("/all", requireAuth, UserCtr.getAll);
+router.post("/forgot-password-request", UserCtr.forgotPasswordRequest);
+router.post("/reset-password", UserCtr.resetPassword);
 
 module.exports = router;
