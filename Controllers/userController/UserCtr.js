@@ -174,7 +174,6 @@ exports.getAll = async (req, res) => {
     return res.status(500).json({ message: "サーバーエラー", error: true });
   }
 };
-
 exports.stop = async (req, res) => {
   try {
     const member_id = req.params.id;
