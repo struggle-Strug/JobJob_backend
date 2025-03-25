@@ -174,7 +174,6 @@ exports.getAll = async (req, res) => {
     return res.status(500).json({ message: "サーバーエラー", error: true });
   }
 };
-
 exports.stop = async (req, res) => {
   try {
     const member_id = req.params.id;
@@ -200,6 +199,61 @@ exports.forgotPassword = async (req, res) => {
     await user.save();
 
     return res.status(200).json({ message: "更新成功!" });
+  } catch (error) {
+    return res.status(500).json({ message: "サーバーエラー", error: true });
+  }
+};
+
+// controllers/userController.js
+exports.forgotPasswordRequest = async (req, res) => {
+  console.log("Forgot Password Request received for email:", req.body.email);
+
+  try {
+    const user = await User.findOne({ email: req.body.email });
+    if (!user) {
+      console.log("User not found for email:", req.body.email);
+      return res.json({ message: "ユーザーが見つかりません。", error: true });
+    }
+    // トークン生成（例：1時間有効）
+    const token = jwt.sign({ id: user._id }, process.env.SECRET, {
+      expiresIn: "1h",
+    });
+
+    // SendGridなどを利用して認証メール送信
+    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+    const msg = {
+      to: req.body.email,
+      from: "huskar020911@gmail.com", // 認証済みの送信元アドレス
+      subject: "パスワードリセットのご案内",
+      text: `以下のリンクからパスワードリセットを行ってください:\n\nhttp://yourdomain.com/reset-password?token=${token}`,
+      html: `<p>以下のリンクからパスワードリセットを行ってください:</p>
+             <p><a href="http://127.0.0.1:3000/reset-password?token=${token}" target="_blank">パスワードリセット</a></p>`,
+    };
+    console.log(`http://127.0.0.1:3000/reset-password?token=${token}`);
+    await sgMail.send(msg);
+    console.log("Password reset email sent to:", req.body.email);
+    return res.status(200).json({ message: "パスワードリセット用のメールを送信しました" });
+  } catch (error) {
+    console.error("Error in forgotPasswordRequest:", error);
+    return res.status(500).json({ message: "サーバーエラー", error: true });
+  }
+};
+
+
+
+exports.resetPassword = async (req, res) => {
+  try {
+    const { token, newPassword } = req.body;
+    // トークン検証
+    const decoded = jwt.verify(token, process.env.SECRET);
+    const user = await User.findById(decoded.id);
+    if (!user) {
+      return res.json({ message: "ユーザーが見つかりません。", error: true });
+    }
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(newPassword, salt);
+    await user.save();
+    return res.status(200).json({ message: "パスワードの更新に成功しました" });
   } catch (error) {
     return res.status(500).json({ message: "サーバーエラー", error: true });
   }
