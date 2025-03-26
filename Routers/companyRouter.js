@@ -3,6 +3,7 @@ const companyController = require("../Controllers/companyController");
 const requireAuth = require("../Middleware/RequireAuth");
 
 router.post("/", requireAuth, companyController.create);
-router.get("/:companyName", requireAuth, companyController.getCompanyInfo);
+router.put("/", requireAuth, companyController.update);
+router.get("/", requireAuth, companyController.getCompanyInfo);
 
 module.exports = router;
