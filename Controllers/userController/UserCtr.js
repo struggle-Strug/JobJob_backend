@@ -225,11 +225,11 @@ exports.forgotPasswordRequest = async (req, res) => {
       to: req.body.email,
       from: "huskar020911@gmail.com", // 認証済みの送信元アドレス
       subject: "パスワードリセットのご案内",
-      text: `以下のリンクからパスワードリセットを行ってください:\n\nhttp://yourdomain.com/reset-password?token=${token}`,
+      text: `以下のリンクからパスワードリセットを行ってください:\n\nhttp://staging.jobjob-jp.com/reset-password?token=${token}`,
       html: `<p>以下のリンクからパスワードリセットを行ってください:</p>
-             <p><a href="http://127.0.0.1:3000/reset-password?token=${token}" target="_blank">パスワードリセット</a></p>`,
+             <p><a href="http://staging.jobjob-jp.com/reset-password?token=${token}" target="_blank">パスワードリセット</a></p>`,
     };
-    console.log(`http://127.0.0.1:3000/reset-password?token=${token}`);
+    console.log(`http://staging.jobjob-jp.com/reset-password?token=${token}`);
     await sgMail.send(msg);
     console.log("Password reset email sent to:", req.body.email);
     return res.status(200).json({ message: "パスワードリセット用のメールを送信しました" });
