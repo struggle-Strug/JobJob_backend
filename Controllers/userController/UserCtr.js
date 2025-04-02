@@ -20,11 +20,12 @@ exports.register = async (req, res) => {
 
     const msg = {
       to: req.body.email,
-      from: "huskar020911@gmail.com", // Must be a verified sender on SendGrid
-      subject: "会員登録完了",
-      text: `差出人：ジョブジョブ運営事務局
-    FROM：noreply@jobjob-jp.com
-    件名：新規会員登録完了のお知らせ
+      from: {
+        email: "noreply@jobjob-jp.com",
+        name: "ジョブジョブ運営事務局"
+      }, 
+      subject: "［ジョブジョブ］新規会員登録完了のお知らせ",
+      text: `
     
     この度はジョブジョブに会員登録いただき誠にありがとうございます。
     
@@ -45,7 +46,7 @@ exports.register = async (req, res) => {
     【お問い合わせ先】
     ジョブジョブ運営事務局
     お問い合わせフォーム
-    http://142.132.202.228:3000/customers/contact/
+    http://staging.jobjob-jp.com/customers/contact/
     ----------------------------------------------------------------------
     `,
       html: `
@@ -56,9 +57,9 @@ exports.register = async (req, res) => {
             <p>ID：<strong>${req.body.email}</strong>。</p>
             <p>パスワード：<strong>${req.body.password}</strong>。</p>
             <p>求人検索はこちら</p>
-            <p><a href="http://142.132.202.228:3000/" target="_blank">http://142.132.202.228:3000/</a></p>
+            <p><a href="http://staging.jobjob-jp.com/" target="_blank">http://staging.jobjob-jp.com/</a></p>
             <p>マイページはこちら</p>
-            <p><a href="http://142.132.202.228:3000/members/mypage" target="_blank">http://142.132.202.228:3000/members/mypage</a></p>
+            <p><a href="http://staging.jobjob-jp.com/members/mypage" target="_blank">http://staging.jobjob-jp.com/members/mypage</a></p>
             <br/>
             <p>本メールの送信アドレスは送信専用です。</p>
             <p>本メールに直接ご返信いただいてもご対応できかねますので、ご注意願います。</p>
@@ -68,7 +69,7 @@ exports.register = async (req, res) => {
             <p><strong>【お問い合わせ先】</strong></p>
             <p>ジョブジョブ運営事務局</p>
             <p>お問い合わせフォーム</p>
-            <p><a href="http://142.132.202.228:3000/customers/contact/" target="_blank">http://142.132.202.228:3000/customers/contact/</a></p>`,
+            <p><a href="http://staging.jobjob-jp.com/customers/contact/" target="_blank">http://staging.jobjob-jp.com/customers/contact/</a></p>`,
     };
 
     await sgMail.send(msg);
@@ -219,11 +220,14 @@ exports.forgotPasswordRequest = async (req, res) => {
       expiresIn: "1h",
     });
 
-    // SendGridなどを利用して認証メール送信
+    // SendGrid の API キーをセット
     sgMail.setApiKey(process.env.SENDGRID_API_KEY);
     const msg = {
       to: req.body.email,
-      from: "huskar020911@gmail.com", // 認証済みの送信元アドレス
+      from: {
+        email: "noreply@jobjob-jp.com",
+        name: "ジョブジョブ運営事務局"
+      },
       subject: "パスワードリセットのご案内",
       text: `以下のリンクからパスワードリセットを行ってください:\n\nhttp://staging.jobjob-jp.com/reset-password?token=${token}`,
       html: `<p>以下のリンクからパスワードリセットを行ってください:</p>
@@ -238,8 +242,6 @@ exports.forgotPasswordRequest = async (req, res) => {
     return res.status(500).json({ message: "サーバーエラー", error: true });
   }
 };
-
-
 
 exports.resetPassword = async (req, res) => {
   try {
