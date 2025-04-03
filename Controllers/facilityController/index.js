@@ -36,7 +36,9 @@ exports.createFacility = async (req, res) => {
     await newFacility.save();
     res.status(200).json({ message: "施設登録成功", facility: newFacility });
   } catch (error) {
-    res.status(500).json({ message: "サーバーエラー", error: true });
+    console.error("Facility作成エラー:", error);
+    res.status(500).json({ message: "サーバーエラー", error: error.message });
+
   }
 };
 
