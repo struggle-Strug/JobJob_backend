@@ -351,7 +351,7 @@ http://142.132.202.228:3000/customers/contact/
 
       await sgMail.send(msg);
     }
-    res.status(200).json({ message: "求人掲載申請成功", jobPost: jobPost });
+    res.status(200).json({ message: "求人掲載申請完了", jobPost: jobPost });
   } catch (error) {
     res.status(500).json({ message: "サーバーエラー", error: true });
   }
@@ -557,7 +557,7 @@ exports.deleteJobPost = async (req, res) => {
       return res
         .status(404)
         .json({ message: "求人が見つかりません", error: true });
-    res.status(200).json({ message: "求人削除成功" });
+    res.status(200).json({ message: "求人削除完了" });
   } catch (error) {
     res.status(500).json({ message: "サーバーエラー", error: true });
   }
