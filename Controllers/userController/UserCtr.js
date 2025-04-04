@@ -66,10 +66,15 @@ exports.register = async (req, res) => {
     <br/>
     <p style="margin: 5px 0; line-height: 1.2;">当メールに関するお問い合わせについては下記へご連絡ください。</p>
     <hr style="margin: 10px 0;"/>
+    <p style="margin: 5px 0; line-height: 1.2;"><strong>----------------------------------------------------------------------
+</strong></p>
     <p style="margin: 5px 0; line-height: 1.2;"><strong>【お問い合わせ先】</strong></p>
     <p style="margin: 5px 0; line-height: 1.2;">ジョブジョブ運営事務局</p>
     <p style="margin: 5px 0; line-height: 1.2;">お問い合わせフォーム</p>
-    <p style="margin: 5px 0; line-height: 1.2;"><a href="http://staging.jobjob-jp.com/customers/contact/" target="_blank">http://staging.jobjob-jp.com/customers/contact/</a></p>`,
+    <p style="margin: 5px 0; line-height: 1.2;"><a href="http://staging.jobjob-jp.com/customers/contact/" target="_blank">http://staging.jobjob-jp.com/customers/contact/</a></p>
+    <p style="margin: 5px 0; line-height: 1.2;"><strong>----------------------------------------------------------------------
+</strong></p>
+    `,
   
     };
 
