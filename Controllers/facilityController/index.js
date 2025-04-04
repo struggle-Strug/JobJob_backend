@@ -34,7 +34,7 @@ exports.createFacility = async (req, res) => {
     });
 
     await newFacility.save();
-    res.status(200).json({ message: "施設登録成功", facility: newFacility });
+    res.status(200).json({ message: "施設登録完了", facility: newFacility });
   } catch (error) {
     console.error("Facility作成エラー:", error);
     res.status(500).json({ message: "サーバーエラー", error: error.message });
@@ -363,7 +363,7 @@ exports.getByCompany = async (req, res) => {
     });
 
     // Step 4: Return the response
-    res.status(200).json({ message: "施設取得成功", facilities: facilities });
+    res.status(200).json({ message: "施設取得完了", facilities: facilities });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "サーバーエラー", error: true });
@@ -375,7 +375,7 @@ exports.deleteFacility = async (req, res) => {
     const facility = await FacilityModel.findOneAndDelete({
       facility_id: req.params.id,
     });
-    res.status(200).json({ message: "施設削除成功", facility: facility });
+    res.status(200).json({ message: "施設削除完了", facility: facility });
   } catch (error) {
     res.status(500).json({ message: "サーバーエラー", error: true });
   }
