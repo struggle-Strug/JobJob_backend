@@ -66,10 +66,15 @@ exports.register = async (req, res) => {
     <br/>
     <p style="margin: 5px 0; line-height: 1.2;">当メールに関するお問い合わせについては下記へご連絡ください。</p>
     <hr style="margin: 10px 0;"/>
+    <p style="margin: 5px 0; line-height: 1.2;"><strong>----------------------------------------------------------------------
+</strong></p>
     <p style="margin: 5px 0; line-height: 1.2;"><strong>【お問い合わせ先】</strong></p>
     <p style="margin: 5px 0; line-height: 1.2;">ジョブジョブ運営事務局</p>
     <p style="margin: 5px 0; line-height: 1.2;">お問い合わせフォーム</p>
-    <p style="margin: 5px 0; line-height: 1.2;"><a href="http://staging.jobjob-jp.com/customers/contact/" target="_blank">http://staging.jobjob-jp.com/customers/contact/</a></p>`,
+    <p style="margin: 5px 0; line-height: 1.2;"><a href="http://staging.jobjob-jp.com/customers/contact/" target="_blank">http://staging.jobjob-jp.com/customers/contact/</a></p>
+    <p style="margin: 5px 0; line-height: 1.2;"><strong>----------------------------------------------------------------------
+</strong></p>
+    `,
   
     };
 
@@ -202,9 +207,13 @@ exports.forgotPassword = async (req, res) => {
 
     return res.status(200).json({ message: "更新成功!" });
   } catch (error) {
-    return res.status(500).json({ message: "サーバーエラー", error: true });
+    console.error("Error in forgotPassword:", error);
+    // エラーの詳細をフロントエンドに返す
+    return res.status(500).json({ message: "サーバーエラー", error: error.message });
   }
 };
+
+
 
 // controllers/userController.js
 exports.forgotPasswordRequest = async (req, res) => {
@@ -240,7 +249,7 @@ exports.forgotPasswordRequest = async (req, res) => {
     return res.status(200).json({ message: "パスワードリセット用のメールを送信しました" });
   } catch (error) {
     console.error("Error in forgotPasswordRequest:", error);
-    return res.status(500).json({ message: "サーバーエラー", error: true });
+    return res.status(500).json({ message: "サーバーエラー", error: error.message });
   }
 };
 
