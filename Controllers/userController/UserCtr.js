@@ -207,9 +207,13 @@ exports.forgotPassword = async (req, res) => {
 
     return res.status(200).json({ message: "更新成功!" });
   } catch (error) {
-    return res.status(500).json({ message: "サーバーエラー", error: true });
+    console.error("Error in forgotPassword:", error);
+    // エラーの詳細をフロントエンドに返す
+    return res.status(500).json({ message: "サーバーエラー", error: error.message });
   }
 };
+
+
 
 // controllers/userController.js
 exports.forgotPasswordRequest = async (req, res) => {
@@ -245,7 +249,7 @@ exports.forgotPasswordRequest = async (req, res) => {
     return res.status(200).json({ message: "パスワードリセット用のメールを送信しました" });
   } catch (error) {
     console.error("Error in forgotPasswordRequest:", error);
-    return res.status(500).json({ message: "サーバーエラー", error: true });
+    return res.status(500).json({ message: "サーバーエラー", error: error.message });
   }
 };
 
