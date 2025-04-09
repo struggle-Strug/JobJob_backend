@@ -97,3 +97,21 @@ exports.updateImages = async (req, res) => {
     return res.status(500).json({ message: "サーバーエラー", error: true });
   }
 };
+
+exports.deleteImageByCustomerId = async (req, res) => {
+  try {
+    const photos = await PhotoModel.findOne({
+      customer_id: req.user.data.customer_id,
+    });
+    const backendUrl = `${req.protocol}://${req.get("host")}`;
+    const imageNameToDelete = `${backendUrl}/uploads/${req.params.imageName}`;
+    const filteredImages = photos.images.filter(
+      (img) => img.photoUrl !== imageNameToDelete
+    );
+    photos.images = filteredImages;
+    return res.json({ message: "写真を更新しました", photos });
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({ message: "サーバーエラー", error: true });
+  }
+};
