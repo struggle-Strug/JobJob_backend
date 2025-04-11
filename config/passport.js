@@ -52,9 +52,7 @@ module.exports = (req, res, next) => {
     if (err || !user) {
       return res.status(401).json({ message: "Unauthorized" });
     }
-    if (user.type === "user") req.user = user.data;
-    if (user.type === "customer") req.customer = user.data;
-    if (user.type === "admin") req.admin = user.data;
+    req.user = user.data;
     next();
   })(req, res, next);
 };
