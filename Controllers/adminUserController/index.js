@@ -52,12 +52,12 @@ exports.loginAsCustomer = async (req, res) => {
 
 exports.tokenlogin = async (req, res) => {
   try {
-    const token = jwt.sign({ id: req.admin._id }, process.env.SECRET, {
+    const token = jwt.sign({ id: req.user._id }, process.env.SECRET, {
       expiresIn: "3d",
     });
     return res
       .status(200)
-      .json({ message: "ログイン成功", token: `JWT ${token}` });
+      .json({ message: "ログイン成功", token: `JWT ${token}`, user: req.user });
   } catch (error) {
     return res.json({ message: "サーバーエラー", error: true });
   }
