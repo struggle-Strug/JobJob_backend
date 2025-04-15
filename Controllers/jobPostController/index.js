@@ -62,6 +62,7 @@ exports.createJobPost = async (req, res) => {
 exports.createJobPostByCopy = async (req, res) => {
   try {
     const jobPost_id = req.params.id;
+    const { facility_id } = req.body;
     const jobPost = await JobPostModel.findOne({ jobpost_id: jobPost_id });
     const jobPosts = await JobPostModel.find({});
     const lastJobPost = jobPosts[jobPosts.length - 1];
@@ -70,7 +71,7 @@ exports.createJobPostByCopy = async (req, res) => {
     const newJobPostId = lastJobPost ? Number(lastJobPost.jobpost_id) + 1 : 1;
     // Create a new job post instance
     const newJobPost = new JobPostModel({
-      facility_id: jobPost.facility_id,
+      facility_id: facility_id,
       customer_id: req.user.data.customer_id,
       jobpost_id: newJobPostId,
       type: jobPost.type,
