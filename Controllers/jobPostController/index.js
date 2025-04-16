@@ -549,6 +549,60 @@ exports.getJobPostsNumbers = async (req, res) => {
   }
 };
 
+exports.getJobPostsByFacility = async (req, res) => {
+  try {
+    const { type } = req.body;
+    const jobPosts = await JobPostModel.find({ type: type });
+    const jobPostsWithDetails = await Promise.all(
+      jobPosts.map(async (jobpost) => {
+        const facility = await facilityModel.findOne({
+          facility_id: jobpost.facility_id,
+        });
+        return {
+          ...jobpost.toObject(), // Convert MongoDB document to plain object
+          facility_id: facility, // Include facility data
+        };
+      })
+    );
+    const numbers = {
+      病院: jobPostsWithDetails.filter(
+        (j) => j.facility_id.facility_genre === "病院"
+      ).length,
+      診療所: jobPostsWithDetails.filter(
+        (j) => j.facility_id.facility_genre === "診療所"
+      ).length,
+      "歯科診療所・技工所": jobPostsWithDetails.filter(
+        (j) => j.facility_id.facility_genre === "歯科診療所・技工所"
+      ).length,
+      "代替医療・リラクゼーション": jobPostsWithDetails.filter(
+        (j) => j.facility_id.facility_genre === "代替医療・リラクゼーション"
+      ).length,
+      "介護・福祉事業所": jobPostsWithDetails.filter(
+        (j) => j.facility_id.facility_genre === "介護・福祉事業所"
+      ).length,
+      "薬局・ドラッグストア": jobPostsWithDetails.filter(
+        (j) => j.facility_id.facility_genre === "薬局・ドラッグストア"
+      ).length,
+      訪問看護ステーション: jobPostsWithDetails.filter(
+        (j) => j.facility_id.facility_genre === "訪問看護ステーション"
+      ).length,
+      "保育園・幼稚園": jobPostsWithDetails.filter(
+        (j) => j.facility_id.facility_genre === "保育園・幼稚園"
+      ).length,
+      "美容・サロン・ジム": jobPostsWithDetails.filter(
+        (j) => j.facility_id.facility_genre === "美容・サロン・ジム"
+      ).length,
+      "その他（企業・学校等）": jobPostsWithDetails.filter(
+        (j) => j.facility_id.facility_genre === "その他（企業・学校等）"
+      ).length,
+    };
+    return res.json({ message: "success", numbers });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "サーバーエラー", error: true });
+  }
+};
+
 exports.deleteJobPost = async (req, res) => {
   try {
     const jobPost = await JobPostModel.findOneAndDelete({
