@@ -38,7 +38,6 @@ exports.createFacility = async (req, res) => {
   } catch (error) {
     console.error("Facility作成エラー:", error);
     res.status(500).json({ message: "サーバーエラー", error: error.message });
-
   }
 };
 
@@ -334,16 +333,28 @@ http://142.132.202.228:3000/customers/contact/
 
 exports.updateFacility = async (req, res) => {
   try {
+    // Find the facility by its ID and update it with the request body
     const facility = await FacilityModel.findOneAndUpdate(
-      { facility_id: req.params.id },
-      req.body
+      { facility_id: req.params.id }, // Filter by the `facility_id`
+      req.body, // Update with request body data
+      { new: true } // Ensure the updated document is returned
     );
+
+    // If the facility is not found, return a 404 error
+    if (!facility) {
+      return res.status(404).json({ message: "施設が見つかりませんでした。" }); // "Facility not found"
+    }
+
+    // Update the status of the facility and save it to the database
+    facility.allowed = "pending";
+    await facility.save(); // Save the updated facility document to the database
+
     res
       .status(200)
-      .json({ message: "施設を更新しました。", facility: facility });
+      .json({ message: "施設を更新しました。", facility: facility }); // "Facility updated"
   } catch (error) {
     console.log(error);
-    res.status(500).json({ message: "サーバーエラー", error: true });
+    res.status(500).json({ message: "サーバーエラー", error: true }); // "Server error"
   }
 };
 
