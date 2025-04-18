@@ -212,7 +212,7 @@ exports.getFacilityByUser = async (req, res) => {
 exports.getPendingFacilities = async (req, res) => {
   try {
     const facilities = await FacilityModel.find({ allowed: "pending" }).sort({
-      createdAt: -1,
+      created_at: -1,
     });
 
     const facilitiesWithDetails = await Promise.all(
