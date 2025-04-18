@@ -361,6 +361,12 @@ http://142.132.202.228:3000/customers/contact/
       };
 
       await sgMail.send(msg);
+    } else if (req.params.status === "ended") {
+      // Set all job posts with this facility to "draft"
+      const result = await JobPostModel.updateMany(
+        { facility_id: facility.facility_id },
+        { allowed: "draft" }
+      );
     }
 
     res
@@ -426,6 +432,9 @@ exports.deleteFacility = async (req, res) => {
     const facility = await FacilityModel.findOneAndDelete({
       facility_id: req.params.id,
     });
+
+    await JobPostModel.deleteMany({ facility_id: req.params.id });
+
     res.status(200).json({ message: "施設削除完了", facility: facility });
   } catch (error) {
     res.status(500).json({ message: "サーバーエラー", error: true });
