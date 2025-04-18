@@ -28,16 +28,16 @@ exports.register = async (req, res) => {
         name: "ジョブジョブ運営事務局",
       },
       subject: "［ジョブジョブ］新規会員登録完了のお知らせ",
-      text: `
+      text: [`
     この度はジョブジョブに会員登録いただき誠にありがとうございます。
     
     ID：${req.body.email}。
     パスワード：${req.body.password}。
     
     求人検索はこちら
-    http://142.132.202.228:3000/
+    http://staging.jobjob-jp.com/
     マイページはこちら
-    http://142.132.202.228:3000/members/mypage
+    http://staging.jobjob-jp.com/members/mypage
     
     本メールの送信アドレスは送信専用です。
     本メールに直接ご返信いただいてもご対応できかねますので、ご注意願います。
@@ -50,7 +50,7 @@ exports.register = async (req, res) => {
     お問い合わせフォーム
     http://staging.jobjob-jp.com/customers/contact/
     ----------------------------------------------------------------------
-    `,
+    `].join("\n"),
       html: `
     <p style="margin: 5px 0; line-height: 1.2;">差出人：ジョブジョブ運営事務局</p>
     <p style="margin: 5px 0; line-height: 1.2;">FROM：noreply@jobjob-jp.com</p>
@@ -257,7 +257,7 @@ exports.forgotPasswordRequest = async (req, res) => {
         name: "ジョブジョブ運営事務局",
       },
       subject: "パスワードリセットのご案内",
-      text: `以下のリンクからパスワードリセットを行ってください:\n\nhttp://staging.jobjob-jp.com/reset-password?token=${token}`,
+      text: [`以下のリンクからパスワードリセットを行ってください:\n\nhttp://staging.jobjob-jp.com/reset-password?token=${token}`].join("\n"),
       html: `<p style="margin: 5px 0; line-height: 1.2;">以下のリンクからパスワードリセットを行ってください:</p>
              <p style="margin: 5px 0; line-height: 1.2;"><a href="http://staging.jobjob-jp.com/reset-password?token=${token}" target="_blank">パスワードリセット</a></p>`,
     };
