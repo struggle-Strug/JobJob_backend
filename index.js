@@ -56,6 +56,10 @@ routes.forEach((file) => {
   app.use(`${process.env.API_PREFIX}/${routeName}`, router);
 });
 
+app.get("/", (req, res) => {
+  return res.json({ message: "works" });
+});
+
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

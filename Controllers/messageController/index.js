@@ -7,8 +7,12 @@ const sgMail = require("@sendgrid/mail");
 
 exports.save = async (req, res) => {
   try {
-    const { jobPost_id, sender, recevier, content } = req.body;
+    const { jobPost_id, sender, recevier, content, meetingDate } = req.body;
     const customer = await CustomerModel.findOne({ _id: recevier });
+    const jobPost = await JobPostModel.findOne({ jobpost_id: jobPost_id });
+    const facility = await FacilityModel.findOne({
+      facility_id: jobPost.facility_id,
+    });
 
     // Set your SendGrid API key
     sgMail.setApiKey(process.env.SENDGRID_API_KEY);
@@ -40,8 +44,76 @@ exports.save = async (req, res) => {
       to: req.user.data.email,
       from: "huskar020911@gmail.com", // Must be a verified sender on SendGrid
       subject: "応募完了",
-      text: `応募が完了しました。`,
-      html: `<strong>応募が完了しました。</strong>`,
+      text: `差出人：ジョブジョブ運営事務局
+FROM：noreply@jobjob-jp.com
+件名：［ジョブジョブ］応募完了のお知らせ
+
+この度はジョブジョブでの応募ありがとうございます。
+
+■応募求人
+${facility.name}
+${jobPost.type}(${jobPost.employment_type})
+■面接希望日
+${meetingDate
+  .map(
+    (meeting) =>
+      `${meeting.date} ${meeting.times
+        .map((meetingTime) => `${meetingTime.time}:${meetingTime.minute}~`)
+        .join(", ")}`
+  )
+  .join("\n")}
+
+応募後の法人・施設とのやり取りはメッセージ機能をご利用ください。
+http://staging.jobjob-jp.com/members/message
+応募済み求人の確認はこちら
+http://staging.jobjob-jp.com/members/job_offers/apply
+
+
+本メールの送信アドレスは送信専用です。
+本メールに直接ご返信いただいてもご対応できかねますので、ご注意願います。
+
+当メールに関するお問い合わせについては下記へご連絡ください。
+
+----------------------------------------------------------------------
+【お問い合わせ先】
+ジョブジョブ運営事務局
+お問い合わせフォーム
+http://142.132.202.228:3000/customers/contact/
+----------------------------------------------------------------------
+`,
+      html: `
+        <p>差出人：ジョブジョブ運営事務局</p>
+        <p>FROM：noreply@jobjob-jp.com</p>
+        <p>件名：［ジョブジョブ］応募完了のお知らせ</p>
+        <p>この度はジョブジョブでの応募ありがとうございます。</p>
+        <p>■応募求人</p>
+        <p>${facility.name}</p>
+        <p>${jobPost.type}(${jobPost.employment_type})</p>
+        <p>■面接希望日</p>
+        <p>${meetingDate
+          .map(
+            (meeting) =>
+              `${meeting.date} ${meeting.times
+                .map(
+                  (meetingTime) => `${meetingTime.time}:${meetingTime.minute}~`
+                )
+                .join(", ")}`
+          )
+          .join("\n")}</p>
+        <p>応募後の法人・施設とのやり取りはメッセージ機能をご利用ください。</p>
+        <p><a href="http://staging.jobjob-jp.com/members/message" target="_blank">http://staging.jobjob-jp.com/members/message</a></p>
+        <p>応募済み求人の確認はこちら</p>
+        <p><a href="http://staging.jobjob-jp.com/members/job_offers/apply" target="_blank">http://staging.jobjob-jp.com/members/job_offers/apply</a></p>
+        <br/>
+        <p>本メールの送信アドレスは送信専用です。</p>
+        <p>本メールに直接ご返信いただいてもご対応できかねますので、ご注意願います。</p>
+        <br/>
+        <p>当メールに関するお問い合わせについては下記へご連絡ください。</p>
+        <hr>
+        <p><strong>【お問い合わせ先】</strong></p>
+        <p>ジョブジョブ運営事務局</p>
+        <p>お問い合わせフォーム</p>
+        <p><a href="http://142.132.202.228:3000/customers/contact/" target="_blank">http://142.132.202.228:3000/customers/contact/</a></p>`,
     };
 
     const msg_1 = {
