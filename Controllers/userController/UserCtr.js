@@ -2,15 +2,17 @@ const User = require("../../Models/UserModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const sgMail = require("@sendgrid/mail");
-
 exports.register = async (req, res) => {
   try {
     const user = await User.findOne({ email: req.body.email });
+
     // Set your SendGrid API key
     sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
     if (user) {
       return res.json({ message: "既に登録済みのユーザーです。", error: true });
     }
+
     const members = await User.find();
     const newUser = new User({ ...req.body, member_id: members.length + 1 });
     const salt = await bcrypt.genSalt(10);
@@ -18,15 +20,15 @@ exports.register = async (req, res) => {
 
     await newUser.save();
 
+    // Updated email configuration - using the verified sender email
     const msg = {
       to: req.body.email,
       from: {
-        email: "noreply@jobjob-jp.com",
-        name: "ジョブジョブ運営事務局"
-      }, 
+        email: "huskar020911@gmail.com", // Using the verified email that works in your other controller
+        name: "ジョブジョブ運営事務局",
+      },
       subject: "［ジョブジョブ］新規会員登録完了のお知らせ",
       text: `
-    
     この度はジョブジョブに会員登録いただき誠にありがとうございます。
     
     ID：${req.body.email}。
@@ -49,7 +51,7 @@ exports.register = async (req, res) => {
     http://staging.jobjob-jp.com/customers/contact/
     ----------------------------------------------------------------------
     `,
-    html: `
+      html: `
     <p style="margin: 5px 0; line-height: 1.2;">差出人：ジョブジョブ運営事務局</p>
     <p style="margin: 5px 0; line-height: 1.2;">FROM：noreply@jobjob-jp.com</p>
     <p style="margin: 5px 0; line-height: 1.2;">件名：新規会員登録完了のお知らせ</p>
@@ -75,12 +77,22 @@ exports.register = async (req, res) => {
     <p style="margin: 5px 0; line-height: 1.2;"><strong>----------------------------------------------------------------------
 </strong></p>
     `,
-  
     };
 
-    await sgMail.send(msg);
+    try {
+      await sgMail.send(msg);
+      console.log("Email sent successfully");
+    } catch (emailError) {
+      console.error("SendGrid Error:", emailError);
+      // Continue with registration even if email fails
+      if (emailError.response) {
+        console.error("Error body:", emailError.response.body);
+      }
+    }
+
     return res.status(201).json({ message: "登録成功!", user: newUser });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({ message: "サーバーエラー", error: true });
   }
 };
@@ -126,6 +138,12 @@ exports.update = async (req, res) => {
     const user = await User.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
     });
+
+    if (req.body.qualification.length > 0) {
+      user.qualification = req.body.qualification;
+    }
+
+    await user.save();
     return res.status(200).json({ message: "更新成功!", user: user });
   } catch (error) {
     return res.status(500).json({ message: "サーバーエラー", error: true });
@@ -209,11 +227,11 @@ exports.forgotPassword = async (req, res) => {
   } catch (error) {
     console.error("Error in forgotPassword:", error);
     // エラーの詳細をフロントエンドに返す
-    return res.status(500).json({ message: "サーバーエラー", error: error.message });
+    return res
+      .status(500)
+      .json({ message: "サーバーエラー", error: error.message });
   }
 };
-
-
 
 // controllers/userController.js
 exports.forgotPasswordRequest = async (req, res) => {
@@ -236,7 +254,7 @@ exports.forgotPasswordRequest = async (req, res) => {
       to: req.body.email,
       from: {
         email: "noreply@jobjob-jp.com",
-        name: "ジョブジョブ運営事務局"
+        name: "ジョブジョブ運営事務局",
       },
       subject: "パスワードリセットのご案内",
       text: `以下のリンクからパスワードリセットを行ってください:\n\nhttp://staging.jobjob-jp.com/reset-password?token=${token}`,
@@ -246,10 +264,14 @@ exports.forgotPasswordRequest = async (req, res) => {
     console.log(`http://staging.jobjob-jp.com/reset-password?token=${token}`);
     await sgMail.send(msg);
     console.log("Password reset email sent to:", req.body.email);
-    return res.status(200).json({ message: "パスワードリセット用のメールを送信しました" });
+    return res
+      .status(200)
+      .json({ message: "パスワードリセット用のメールを送信しました" });
   } catch (error) {
     console.error("Error in forgotPasswordRequest:", error);
-    return res.status(500).json({ message: "サーバーエラー", error: error.message });
+    return res
+      .status(500)
+      .json({ message: "サーバーエラー", error: error.message });
   }
 };
 
