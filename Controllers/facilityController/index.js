@@ -153,6 +153,46 @@ exports.getFacility = async (req, res) => {
       facility_id: req.params.id,
     });
 
+    console.log(req.user);
+
+    // if (
+    //   (req.user === null || req, user.role === "member") &&
+    //   facility.allowed !== "allowed"
+    // ) {
+    //   return res.json({
+    //     message: "この施設は承認されていない施設です。",
+    //     error: true,
+    //   });
+    // }
+
+    const jobPosts = (
+      await JobPostModel.find({ facility_id: facility.facility_id })
+    ).filter((jobPost) => jobPost.allowed === "allowed");
+
+    const facilityWithDetails = {
+      ...facility.toObject(),
+      jobPosts: jobPosts,
+    };
+    res
+      .status(200)
+      .json({ message: "施設取得成功", facility: facilityWithDetails });
+  } catch (error) {
+    res.status(500).json({ message: "サーバーエラー", error: true });
+  }
+};
+
+exports.getFacilityByUser = async (req, res) => {
+  try {
+    const facility = await FacilityModel.findOne({
+      facility_id: req.params.id,
+    });
+
+    if (facility.allowed !== "allowed") {
+      return res.json({
+        message: "この施設は承認されていない施設です。",
+      });
+    }
+
     const jobPosts = (
       await JobPostModel.find({ facility_id: facility.facility_id })
     ).filter((jobPost) => jobPost.allowed === "allowed");
@@ -321,6 +361,12 @@ http://142.132.202.228:3000/customers/contact/
       };
 
       await sgMail.send(msg);
+    } else if (req.params.status === "ended") {
+      // Set all job posts with this facility to "draft"
+      const result = await JobPostModel.updateMany(
+        { facility_id: facility.facility_id },
+        { allowed: "draft" }
+      );
     }
 
     res
@@ -386,6 +432,9 @@ exports.deleteFacility = async (req, res) => {
     const facility = await FacilityModel.findOneAndDelete({
       facility_id: req.params.id,
     });
+
+    await JobPostModel.deleteMany({ facility_id: req.params.id });
+
     res.status(200).json({ message: "施設削除完了", facility: facility });
   } catch (error) {
     res.status(500).json({ message: "サーバーエラー", error: true });

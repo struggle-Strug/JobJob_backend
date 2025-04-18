@@ -10,6 +10,7 @@ router.post(
 router.post("/", requireAuth, facilityController.createFacility);
 router.put("/:id", requireAuth, facilityController.updateFacility);
 router.delete("/:id", requireAuth, facilityController.deleteFacility);
+router.get("/user/:id", facilityController.getFacilityByUser);
 router.get("/getByCompany", requireAuth, facilityController.getByCompany);
 router.get("/request", requireAuth, facilityController.getPendingFacilities);
 router.get("/customer", requireAuth, facilityController.getCustomerFacilties);
