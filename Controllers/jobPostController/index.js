@@ -157,6 +157,42 @@ exports.getJobPostById = async (req, res) => {
   }
 };
 
+exports.getJobPostByUserById = async (req, res) => {
+  try {
+    const jobPost = await JobPostModel.findOne({ jobpost_id: req.params.id });
+    if (!jobPost) {
+      return res
+        .status(404)
+        .json({ message: "Job post not found", error: true });
+    }
+
+    if (jobPost.allowed !== "allowed") {
+      return res.json({
+        message: "この求人は承認されていない求人です。",
+      });
+    }
+
+    // Fetch customer and facility details
+    const customer = await customerModel.findOne({
+      customer_id: jobPost.customer_id,
+    });
+    const facility = await facilityModel.findOne({
+      facility_id: jobPost.facility_id,
+    });
+
+    const jobPostWithDetails = {
+      ...jobPost.toObject(), // Convert MongoDB document to a plain object
+      customer_id: customer, // Include customer data
+      facility_id: facility, // Include facility data
+    };
+
+    res.status(200).json({ jobpost: jobPostWithDetails });
+  } catch (error) {
+    console.error("Error fetching job post by ID:", error);
+    res.status(500).json({ message: "サーバーエラー", error: true });
+  }
+};
+
 exports.getJobPostByFacilityId = async (req, res) => {
   try {
     const jobPosts = await JobPostModel.find({

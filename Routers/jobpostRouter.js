@@ -11,6 +11,7 @@ router.post("/favouriteorrecent", requireAuth, jobPostController.getFavourites);
 router.post("/numberByNumber", jobPostController.getJobPostsByFacility);
 router.delete("/:id", requireAuth, jobPostController.deleteJobPost);
 router.get("/facility/:id", jobPostController.getJobPostByFacilityId);
+router.get("/user/:id", jobPostController.getJobPostByUserById);
 router.get("/number", jobPostController.getJobPostsNumbers);
 router.get("/applied", requireAuth, jobPostController.getAppliedJobPosts);
 router.get("/:id", jobPostController.getJobPostById);
