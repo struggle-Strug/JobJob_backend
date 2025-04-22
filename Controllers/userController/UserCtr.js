@@ -5,7 +5,7 @@ const sgMail = require("@sendgrid/mail");
 exports.register = async (req, res) => {
   try {
     const user = await User.findOne({ email: req.body.email });
-
+    console.log("REGISTER SENDGRID_API_KEY:", process.env.SENDGRID_API_KEY?.slice(0,4) + "…");
     // Set your SendGrid API key
     sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
@@ -235,8 +235,6 @@ exports.forgotPassword = async (req, res) => {
 
 // controllers/userController.js
 exports.forgotPasswordRequest = async (req, res) => {
-  console.log("Forgot Password Request received for email:", req.body.email);
-
   try {
     const user = await User.findOne({ email: req.body.email });
     if (!user) {
@@ -253,7 +251,7 @@ exports.forgotPasswordRequest = async (req, res) => {
     const msg = {
       to: req.body.email,
       from: {
-        email: "noreply@jobjob-jp.com",
+        email: "huskar020911@gmail.com",
         name: "ジョブジョブ運営事務局",
       },
       subject: "パスワードリセットのご案内",
@@ -261,17 +259,14 @@ exports.forgotPasswordRequest = async (req, res) => {
       html: `<p style="margin: 5px 0; line-height: 1.2;">以下のリンクからパスワードリセットを行ってください:</p>
              <p style="margin: 5px 0; line-height: 1.2;"><a href="http://staging.jobjob-jp.com/reset-password?token=${token}" target="_blank">パスワードリセット</a></p>`,
     };
-    console.log(`http://staging.jobjob-jp.com/reset-password?token=${token}`);
     await sgMail.send(msg);
-    console.log("Password reset email sent to:", req.body.email);
     return res
       .status(200)
       .json({ message: "パスワードリセット用のメールを送信しました" });
-  } catch (error) {
-    console.error("Error in forgotPasswordRequest:", error);
+  } catch (emailError) {
     return res
       .status(500)
-      .json({ message: "サーバーエラー", error: error.message });
+      .json({ message: "メール送信に失敗しました", error: emailError.response.body });
   }
 };
 
