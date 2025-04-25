@@ -22,10 +22,7 @@ exports.register = async (req, res) => {
     // Updated email configuration - using the verified sender email
     const msg = {
       to: req.body.email,
-      from: {
-        email: "noreply@jobjob-jp.com", // Using the verified email that works in your other controller
-        name: "ジョブジョブ運営事務局",
-      },
+      from: "huskar020911@gmail.com", // Using the verified email that works in your other controller
       subject: "［ジョブジョブ］新規会員登録完了のお知らせ",
       text: [
         `
