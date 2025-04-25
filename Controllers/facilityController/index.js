@@ -153,18 +153,6 @@ exports.getFacility = async (req, res) => {
       facility_id: req.params.id,
     });
 
-    console.log(req.user);
-
-    // if (
-    //   (req.user === null || req, user.role === "member") &&
-    //   facility.allowed !== "allowed"
-    // ) {
-    //   return res.json({
-    //     message: "この施設は承認されていない施設です。",
-    //     error: true,
-    //   });
-    // }
-
     const jobPosts = (
       await JobPostModel.find({ facility_id: facility.facility_id })
     ).filter((jobPost) => jobPost.allowed === "allowed");

@@ -5,10 +5,6 @@ const sgMail = require("@sendgrid/mail");
 exports.register = async (req, res) => {
   try {
     const user = await User.findOne({ email: req.body.email });
-    console.log(
-      "REGISTER SENDGRID_API_KEY:",
-      process.env.SENDGRID_API_KEY?.slice(0, 4) + "…"
-    );
     // Set your SendGrid API key
     sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
@@ -271,12 +267,10 @@ exports.forgotPasswordRequest = async (req, res) => {
       .status(200)
       .json({ message: "パスワードリセット用のメールを送信しました" });
   } catch (emailError) {
-    return res
-      .status(500)
-      .json({
-        message: "メール送信に失敗しました",
-        error: emailError.response.body,
-      });
+    return res.status(500).json({
+      message: "メール送信に失敗しました",
+      error: emailError.response.body,
+    });
   }
 };
 
