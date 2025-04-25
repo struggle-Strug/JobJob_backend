@@ -5,7 +5,6 @@ const sgMail = require("@sendgrid/mail");
 exports.register = async (req, res) => {
   try {
     const user = await User.findOne({ email: req.body.email });
-    console.log("REGISTER SENDGRID_API_KEY:", process.env.SENDGRID_API_KEY?.slice(0,4) + "…");
     // Set your SendGrid API key
     sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
@@ -23,16 +22,15 @@ exports.register = async (req, res) => {
     // Updated email configuration - using the verified sender email
     const msg = {
       to: req.body.email,
-      from: {
-        email: "huskar020911@gmail.com", // Using the verified email that works in your other controller
-        name: "ジョブジョブ運営事務局",
-      },
+      from: "huskar020911@gmail.com", // Using the verified email that works in your other controller
       subject: "［ジョブジョブ］新規会員登録完了のお知らせ",
-      text: [`
+      text: [
+        `
     この度はジョブジョブに会員登録いただき誠にありがとうございます。
     
-    ID：${req.body.email}。
-    パスワード：${req.body.password}。
+    ID：ご登録のメールアドレス
+
+    パスワード：ご登録時に設定いただいたパスワード
     
     求人検索はこちら
     http://staging.jobjob-jp.com/
@@ -50,14 +48,17 @@ exports.register = async (req, res) => {
     お問い合わせフォーム
     http://staging.jobjob-jp.com/customers/contact/
     ----------------------------------------------------------------------
-    `].join("\n"),
+    `,
+      ].join("\n"),
       html: `
-    <p style="margin: 5px 0; line-height: 1.2;">差出人：ジョブジョブ運営事務局</p>
-    <p style="margin: 5px 0; line-height: 1.2;">FROM：noreply@jobjob-jp.com</p>
-    <p style="margin: 5px 0; line-height: 1.2;">件名：新規会員登録完了のお知らせ</p>
+    <p style="margin: 5px 0; line-height: 1.2;">ジョブジョブ運営事務局</p>
+    <p style="margin: 5px 0; line-height: 1.2;">noreply@jobjob-jp.com</p>
+    <p style="margin: 5px 0; line-height: 1.2;">新規会員登録完了のお知らせ</p>
     <p style="margin: 5px 0; line-height: 1.2;">この度はジョブジョブに会員登録いただき誠にありがとうございます。</p>
-    <p style="margin: 5px 0; line-height: 1.2;">ID：<strong>${req.body.email}</strong>。</p>
-    <p style="margin: 5px 0; line-height: 1.2;">パスワード：<strong>${req.body.password}</strong>。</p>
+    <p style="margin: 5px 0; line-height: 1.2;">ID：<strong>ご登録のメールアドレス</strong></p>
+    <br />
+    <p style="margin: 5px 0; line-height: 1.2;">パスワード：<strong>ご登録時に設定いただいたパスワード</strong></p>
+    <br />
     <p style="margin: 5px 0; line-height: 1.2;">求人検索はこちら</p>
     <p style="margin: 5px 0; line-height: 1.2;"><a href="http://staging.jobjob-jp.com/" target="_blank">http://staging.jobjob-jp.com/</a></p>
     <p style="margin: 5px 0; line-height: 1.2;">マイページはこちら</p>
@@ -108,7 +109,7 @@ exports.login = async (req, res) => {
       return res.json({ message: "パスワードが間違っています。", error: true });
 
     const token = jwt.sign({ id: user._id }, process.env.SECRET, {
-      expiresIn: "30d",
+      expiresIn: "30min",
     });
     return res
       .status(200)
@@ -121,7 +122,7 @@ exports.login = async (req, res) => {
 exports.tokenlogin = async (req, res) => {
   try {
     const token = jwt.sign({ id: req.user._id }, process.env.SECRET, {
-      expiresIn: "30d",
+      expiresIn: "30min",
     });
     return res.status(200).json({
       message: "ログイン成功!",
@@ -255,7 +256,9 @@ exports.forgotPasswordRequest = async (req, res) => {
         name: "ジョブジョブ運営事務局",
       },
       subject: "パスワードリセットのご案内",
-      text: [`以下のリンクからパスワードリセットを行ってください:\n\nhttp://staging.jobjob-jp.com/reset-password?token=${token}`].join("\n"),
+      text: [
+        `以下のリンクからパスワードリセットを行ってください:\n\nhttp://staging.jobjob-jp.com/reset-password?token=${token}`,
+      ].join("\n"),
       html: `<p style="margin: 5px 0; line-height: 1.2;">以下のリンクからパスワードリセットを行ってください:</p>
              <p style="margin: 5px 0; line-height: 1.2;"><a href="http://staging.jobjob-jp.com/reset-password?token=${token}" target="_blank">パスワードリセット</a></p>`,
     };
@@ -264,9 +267,10 @@ exports.forgotPasswordRequest = async (req, res) => {
       .status(200)
       .json({ message: "パスワードリセット用のメールを送信しました" });
   } catch (emailError) {
-    return res
-      .status(500)
-      .json({ message: "メール送信に失敗しました", error: emailError.response.body });
+    return res.status(500).json({
+      message: "メール送信に失敗しました",
+      error: emailError.response.body,
+    });
   }
 };
 
