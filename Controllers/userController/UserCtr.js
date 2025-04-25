@@ -52,12 +52,10 @@ exports.register = async (req, res) => {
     ----------------------------------------------------------------------
     `].join("\n"),
       html: `
-    <p style="margin: 5px 0; line-height: 1.2;">差出人：ジョブジョブ運営事務局</p>
-    <p style="margin: 5px 0; line-height: 1.2;">FROM：noreply@jobjob-jp.com</p>
-    <p style="margin: 5px 0; line-height: 1.2;">件名：新規会員登録完了のお知らせ</p>
     <p style="margin: 5px 0; line-height: 1.2;">この度はジョブジョブに会員登録いただき誠にありがとうございます。</p>
-    <p style="margin: 5px 0; line-height: 1.2;">ID：<strong>${req.body.email}</strong>。</p>
-    <p style="margin: 5px 0; line-height: 1.2;">パスワード：<strong>${req.body.password}</strong>。</p>
+    <p style="margin: 5px 0; line-height: 1.2;">ID：<strong>ご登録のメールアドレス</strong></p>
+    <br/>
+    <p style="margin: 5px 0; line-height: 1.2;">パスワード：<strong>ご登録時に設定いただいたパスワード</strong></p>
     <p style="margin: 5px 0; line-height: 1.2;">求人検索はこちら</p>
     <p style="margin: 5px 0; line-height: 1.2;"><a href="http://staging.jobjob-jp.com/" target="_blank">http://staging.jobjob-jp.com/</a></p>
     <p style="margin: 5px 0; line-height: 1.2;">マイページはこちら</p>
