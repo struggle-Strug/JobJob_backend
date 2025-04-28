@@ -105,10 +105,12 @@ exports.deleteImageByCustomerId = async (req, res) => {
     });
     const backendUrl = `${req.protocol}://${req.get("host")}`;
     const imageNameToDelete = `${backendUrl}/uploads/${req.params.imageName}`;
+
     const filteredImages = photos.images.filter(
       (img) => img.photoUrl !== imageNameToDelete
     );
     photos.images = filteredImages;
+    await photos.save();
     return res.json({ message: "写真を更新しました", photos });
   } catch (error) {
     console.log(error.message);
