@@ -44,44 +44,62 @@ exports.createFacility = async (req, res) => {
 exports.getFacilities = async (req, res) => {
   try {
     const { jobType, facility, pref, employmentType } = req.query;
-    let filter = {};
+    const filter = {};
 
-    // Apply filters for all users (including customers)
-    if (jobType) filter.job_type = { $in: [jobType] };
+    // Apply filters for facility and prefecture
     if (facility) filter.facility_genre = facility;
     if (pref) filter.prefecture = pref;
-    filter.allowed = "allowed"; // Fix assignment
+    filter.allowed = "allowed";
 
-    // Fetch facilities based on filters
-    const facilities = await FacilityModel.find(filter);
+    // Fetch facilities based on basic filters (without jobType filter)
+    const facilities = await FacilityModel.find(filter).lean();
 
     // Fetch job posts for each facility
     const facilitiesWithDetails = await Promise.all(
       facilities.map(async (facility) => {
-        const jobPosts = await JobPostModel.find({
+        // Prepare job post filter
+        const jobPostFilter = {
           facility_id: facility.facility_id,
-          allowed: "allowed", // Only fetch allowed job posts
-        });
+          allowed: "allowed",
+        };
+
+        // Add jobType filter to job posts query if specified
+        if (jobType) {
+          jobPostFilter.type = jobType;
+        }
+
+        const jobPosts = await JobPostModel.find(jobPostFilter).lean();
 
         return {
-          ...facility.toObject(),
-          jobPosts, // Attach job posts to facility
+          ...facility,
+          jobPosts,
         };
       })
     );
 
-    // Filter facilities based on employmentType (if provided)
-    const filteredFacilities = employmentType
-      ? facilitiesWithDetails.filter((facility) =>
-          facility.jobPosts.some((jobpost) =>
-            jobpost.employment_type.includes(employmentType)
-          )
-        )
-      : facilitiesWithDetails;
+    // Filter facilities that have at least one matching job post
+    let filteredFacilities = facilitiesWithDetails;
 
-    return res
-      .status(200)
-      .json({ message: "施設取得成功", facility: filteredFacilities });
+    // If jobType is specified, only include facilities that have at least one job post with that type
+    if (jobType) {
+      filteredFacilities = facilitiesWithDetails.filter(
+        (facility) => facility.jobPosts.length > 0
+      );
+    }
+
+    // Further filter by employmentType if specified
+    if (employmentType) {
+      filteredFacilities = filteredFacilities.filter((facility) =>
+        facility.jobPosts.some((jobpost) =>
+          jobpost.employment_type.includes(employmentType)
+        )
+      );
+    }
+
+    return res.status(200).json({
+      message: "施設取得成功",
+      facility: filteredFacilities,
+    });
   } catch (error) {
     console.error("❌ Error fetching facilities:", error);
     return res.status(500).json({ message: "サーバーエラー", error: true });
