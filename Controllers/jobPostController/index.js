@@ -441,6 +441,8 @@ exports.getFilteredJobPosts = async (req, res) => {
       })
     );
     const filteredJobPosts = jobPostsWithDetails
+      .filter((jobpost) => 
+        filters.facility ? jobpost.facility_id.allowed === "allowed" : true)
       .filter((jobpost) => jobpost.allowed === "allowed")
       .filter((jobpost) => jobpost.type === filters.JobType) // Filter by job type
       .filter((jobpost) =>
