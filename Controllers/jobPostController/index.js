@@ -447,7 +447,9 @@ exports.getFilteredJobPosts = async (req, res) => {
       .filter((jobpost) =>
         filters.facility ? jobpost.facility_id.name === filters.facility : true
       ) // Filter by facility
-      .filter((jobpost) => jobpost.facility_id.prefecture === filters.pref) // Filter by prefecture
+      .filter((jobpost) =>
+        filters.pref ? jobpost.facility_id.prefecture === filters.pref : true
+      ) // Filter by prefecture
       .filter(
         (jobpost) =>
           filters.muni !== "" ? jobpost.facility_id.city === filters.muni : true // Filter by municipality
@@ -470,7 +472,7 @@ exports.getFilteredJobPosts = async (req, res) => {
             ...jobpost.work_time_type,
             ...jobpost.education_content,
           ];
-          return filters.feature.every((f) => jobPostFeatures.includes(f)); // Filter if feature_1 matches
+          return filters.feature.some((f) => jobPostFeatures.includes(f)); // Filter if feature_1 matches
         }
         return true; // Include all if feature_1 is null
       })
