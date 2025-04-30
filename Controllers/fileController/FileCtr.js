@@ -105,7 +105,6 @@ exports.download = (req, res) => {
 
 // Controller function to delete a file
 exports.deleteFile = (req, res) => {
-  console.log("this works");
   const filename = req.params.filename;
   const filePath = path.join(__dirname, "..", "..", "uploads", filename);
 

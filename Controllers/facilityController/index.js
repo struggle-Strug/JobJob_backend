@@ -44,44 +44,62 @@ exports.createFacility = async (req, res) => {
 exports.getFacilities = async (req, res) => {
   try {
     const { jobType, facility, pref, employmentType } = req.query;
-    let filter = {};
+    const filter = {};
 
-    // Apply filters for all users (including customers)
-    if (jobType) filter.job_type = { $in: [jobType] };
+    // Apply filters for facility and prefecture
     if (facility) filter.facility_genre = facility;
     if (pref) filter.prefecture = pref;
-    filter.allowed = "allowed"; // Fix assignment
+    filter.allowed = "allowed";
 
-    // Fetch facilities based on filters
-    const facilities = await FacilityModel.find(filter);
+    // Fetch facilities based on basic filters (without jobType filter)
+    const facilities = await FacilityModel.find(filter).lean();
 
     // Fetch job posts for each facility
     const facilitiesWithDetails = await Promise.all(
       facilities.map(async (facility) => {
-        const jobPosts = await JobPostModel.find({
+        // Prepare job post filter
+        const jobPostFilter = {
           facility_id: facility.facility_id,
-          allowed: "allowed", // Only fetch allowed job posts
-        });
+          allowed: "allowed",
+        };
+
+        // Add jobType filter to job posts query if specified
+        if (jobType) {
+          jobPostFilter.type = jobType;
+        }
+
+        const jobPosts = await JobPostModel.find(jobPostFilter).lean();
 
         return {
-          ...facility.toObject(),
-          jobPosts, // Attach job posts to facility
+          ...facility,
+          jobPosts,
         };
       })
     );
 
-    // Filter facilities based on employmentType (if provided)
-    const filteredFacilities = employmentType
-      ? facilitiesWithDetails.filter((facility) =>
-          facility.jobPosts.some((jobpost) =>
-            jobpost.employment_type.includes(employmentType)
-          )
-        )
-      : facilitiesWithDetails;
+    // Filter facilities that have at least one matching job post
+    let filteredFacilities = facilitiesWithDetails;
 
-    return res
-      .status(200)
-      .json({ message: "施設取得成功", facility: filteredFacilities });
+    // If jobType is specified, only include facilities that have at least one job post with that type
+    if (jobType) {
+      filteredFacilities = facilitiesWithDetails.filter(
+        (facility) => facility.jobPosts.length > 0
+      );
+    }
+
+    // Further filter by employmentType if specified
+    if (employmentType) {
+      filteredFacilities = filteredFacilities.filter((facility) =>
+        facility.jobPosts.some((jobpost) =>
+          jobpost.employment_type.includes(employmentType)
+        )
+      );
+    }
+
+    return res.status(200).json({
+      message: "施設取得成功",
+      facility: filteredFacilities,
+    });
   } catch (error) {
     console.error("❌ Error fetching facilities:", error);
     return res.status(500).json({ message: "サーバーエラー", error: true });
@@ -152,18 +170,6 @@ exports.getFacility = async (req, res) => {
     const facility = await FacilityModel.findOne({
       facility_id: req.params.id,
     });
-
-    console.log(req.user);
-
-    // if (
-    //   (req.user === null || req, user.role === "member") &&
-    //   facility.allowed !== "allowed"
-    // ) {
-    //   return res.json({
-    //     message: "この施設は承認されていない施設です。",
-    //     error: true,
-    //   });
-    // }
 
     const jobPosts = (
       await JobPostModel.find({ facility_id: facility.facility_id })
@@ -258,20 +264,20 @@ exports.updateFacilityStatus = async (req, res) => {
         to: customer.email,
         from: "huskar020911@gmail.com", // Must be a verified sender on SendGrid
         subject: "施設審査結果",
-        text: `差出人：ジョブジョブ運営事務局
-FROM：noreply@jobjob-jp.com
-件名：［ジョブジョブ］施設申請の審査結果
+        text: `ジョブジョブ運営事務局
+noreply@jobjob-jp.com
+［ジョブジョブ］施設申請の審査結果
 
 この度はジョブジョブへの施設情報を登録いただき誠にありがとうございます。
 
-対象施設：${facility.name}。
+対象施設：${facility.name}
 
 ジョブジョブ運営事務局にて内容確認のうえ掲載を開始致しました。
 掲載ページはこちらからご確認ください。
-施設ページのURLが入ります。
+http://staging.jobjob-jp.com/facility/details/${req.params.id}
 
 こちらの施設での求人掲載は、下記よりログインのうえ求人登録をお願いします。
-http://142.132.202.228:3000/customers/sign_in
+http://staging.jobjob-jp.com/customers/sign_in
 
 本メールの送信アドレスは送信専用です。
 本メールに直接ご返信いただいてもご対応できかねますので、ご注意願います。
@@ -282,20 +288,20 @@ http://142.132.202.228:3000/customers/sign_in
 【お問い合わせ先】
 ジョブジョブ運営事務局
 お問い合わせフォーム
-http://142.132.202.228:3000/customers/contact/
+http://staging.jobjob-jp.com/customers/contact/
 ----------------------------------------------------------------------
 `,
         html: `
-        <p>差出人：ジョブジョブ運営事務局</p>
-        <p>FROM：noreply@jobjob-jp.com</p>
-        <p>件名：［ジョブジョブ］施設申請の審査結果</p>
+        <p>ジョブジョブ運営事務局</p>
+        <p>noreply@jobjob-jp.com</p>
+        <p>［ジョブジョブ］施設申請の審査結果</p>
         <p>この度はジョブジョブへの施設情報を登録いただき誠にありがとうございます。</p>
-        <p>対象施設：<strong>${facility.name}</strong>。</p>
+        <p>対象施設：<strong>${facility.name}</strong></p>
         <p>ジョブジョブ運営事務局にて内容確認のうえ掲載を開始致しました。</p>
         <p>掲載ページはこちらからご確認ください。</p>
-        <p>施設ページのURLが入ります。</p>
+        <p><a href="http://staging.jobjob-jp.com/facility/details/${req.params.id}" target="_blank">http://staging.jobjob-jp.com/facility/details/${req.params.id}</a></p>
         <p>こちらの施設での求人掲載は、下記よりログインのうえ求人登録をお願いします。</p>
-        <p><a href="http://142.132.202.228:3000/customers/sign_in" target="_blank">http://142.132.202.228:3000/customers/sign_in</a></p>
+        <p><a href="http://staging.jobjob-jp.com/customers/sign_in" target="_blank">http://staging.jobjob-jp.com/customers/sign_in</a></p>
         <br/>
         <p>本メールの送信アドレスは送信専用です。</p>
         <p>本メールに直接ご返信いただいてもご対応できかねますので、ご注意願います。</p>
@@ -305,26 +311,26 @@ http://142.132.202.228:3000/customers/contact/
         <p><strong>【お問い合わせ先】</strong></p>
         <p>ジョブジョブ運営事務局</p>
         <p>お問い合わせフォーム</p>
-        <p><a href="http://142.132.202.228:3000/customers/contact/" target="_blank">http://142.132.202.228:3000/customers/contact/</a></p>`,
+        <p><a href="http://staging.jobjob-jp.com/customers/contact/" target="_blank">http://staging.jobjob-jp.com/customers/contact/</a></p>`,
       };
 
       await sgMail.send(msg);
-    } else if (req.params.status === "draft") {
+    } else if (req.params.status === "rejected") {
       const msg = {
         to: customer.email,
         from: "huskar020911@gmail.com", // Must be a verified sender on SendGrid
         subject: "施設審査結果",
-        text: `差出人：ジョブジョブ運営事務局
-FROM：noreply@jobjob-jp.com
-件名：［ジョブジョブ］施設申請の審査結果
+        text: `ジョブジョブ運営事務局
+noreply@jobjob-jp.com
+［ジョブジョブ］施設申請の審査結果
 
 この度はジョブジョブへの施設情報を登録いただき誠にありがとうございます。
 
-対象施設：${facility.name}。
+対象施設：${facility.name}
 
 ジョブジョブ運営事務局にて内容確認させていただいたところ、不適切な表現や情報が含まれておりますため差し戻しとさせていただきます。
 お手数ですが、下記よりログインのうえ施設情報を修正いただき再度申請をお願いします。
-http://142.132.202.228:3000/customers/sign_in
+http://staging.jobjob-jp.com/customers/sign_in
 
 
 本メールの送信アドレスは送信専用です。
@@ -336,18 +342,18 @@ http://142.132.202.228:3000/customers/sign_in
 【お問い合わせ先】
 ジョブジョブ運営事務局
 お問い合わせフォーム
-http://142.132.202.228:3000/customers/contact/
+http://staging.jobjob-jp.com/customers/contact/
 ----------------------------------------------------------------------
 `,
         html: `
-        <p>差出人：ジョブジョブ運営事務局</p>
-        <p>FROM：noreply@jobjob-jp.com</p>
-        <p>件名：［ジョブジョブ］施設申請の審査結果</p>
+        <p>ジョブジョブ運営事務局</p>
+        <p>noreply@jobjob-jp.com</p>
+        <p>［ジョブジョブ］施設申請の審査結果</p>
         <p>この度はジョブジョブへの施設情報を登録いただき誠にありがとうございます。</p>
-        <p>対象施設：<strong>${facility.name}</strong>。</p>
+        <p>対象施設：<strong>${facility.name}</strong></p>
         <p>ジョブジョブ運営事務局にて内容確認させていただいたところ、不適切な表現や情報が含まれておりますため差し戻しとさせていただきます。</p>
         <p>お手数ですが、下記よりログインのうえ施設情報を修正いただき再度申請をお願いします。</p>
-        <p><a href="http://142.132.202.228:3000/customers/sign_in" target="_blank">http://142.132.202.228:3000/customers/sign_in</a></p>
+        <p><a href="http://staging.jobjob-jp.com/customers/sign_in" target="_blank">http://staging.jobjob-jp.com/customers/sign_in</a></p>
         <br/>
         <p>本メールの送信アドレスは送信専用です。</p>
         <p>本メールに直接ご返信いただいてもご対応できかねますので、ご注意願います。</p>
@@ -357,7 +363,7 @@ http://142.132.202.228:3000/customers/contact/
         <p><strong>【お問い合わせ先】</strong></p>
         <p>ジョブジョブ運営事務局</p>
         <p>お問い合わせフォーム</p>
-        <p><a href="http://142.132.202.228:3000/customers/contact/" target="_blank">http://142.132.202.228:3000/customers/contact/</a></p>`,
+        <p><a href="http://staging.jobjob-jp.com/customers/contact/" target="_blank">http://staging.jobjob-jp.com/customers/contact/</a></p>`,
       };
 
       await sgMail.send(msg);

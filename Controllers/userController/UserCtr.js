@@ -56,6 +56,9 @@ exports.register = async (req, res) => {
     <p style="margin: 5px 0; line-height: 1.2;">ID：<strong>ご登録のメールアドレス</strong></p>
     <br/>
     <p style="margin: 5px 0; line-height: 1.2;">パスワード：<strong>ご登録時に設定いただいたパスワード</strong></p>
+    <p style="margin: 5px 0; line-height: 1.2;">ID：<strong>ご登録のメールアドレス</strong></p>
+    <br/>
+    <p style="margin: 5px 0; line-height: 1.2;">パスワード：<strong>ご登録時に設定いただいたパスワード</strong></p>
     <p style="margin: 5px 0; line-height: 1.2;">求人検索はこちら</p>
     <p style="margin: 5px 0; line-height: 1.2;"><a href="http://staging.jobjob-jp.com/" target="_blank">http://staging.jobjob-jp.com/</a></p>
     <p style="margin: 5px 0; line-height: 1.2;">マイページはこちら</p>
