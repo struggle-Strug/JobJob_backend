@@ -59,18 +59,18 @@ const JobPostSchema = new mongoose.Schema({
     required: true,
   },
   salary_max: {
-    type: Number,
+    type: String,
     required: true,
   },
   salary_min: {
-    type: Number,
+    type: String,
     required: true,
   },
   salary_remarks: {
     type: String,
   },
   expected_income: {
-    type: Number,
+    type: String,
   },
   treatment_type: [
     {
