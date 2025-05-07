@@ -52,7 +52,9 @@ exports.getFacilities = async (req, res) => {
     filter.allowed = "allowed";
 
     // Fetch facilities based on basic filters (without jobType filter)
-    const facilities = await FacilityModel.find(filter).lean();
+    const facilities = await FacilityModel.find(filter)
+      .sort({ created_at: -1 })
+      .lean();
 
     // Fetch job posts for each facility
     const facilitiesWithDetails = await Promise.all(
