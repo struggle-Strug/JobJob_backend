@@ -398,6 +398,7 @@ exports.getFavourites = async (req, res) => {
   try {
     const jobPosts = await JobPostModel.find({
       jobpost_id: { $in: req.body.data },
+      allowed: "allowed",
     });
     // Resolve customer and facility data
     const jobPostsWithDetails = await Promise.all(
