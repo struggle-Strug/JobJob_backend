@@ -4,7 +4,6 @@ const facilityModel = require("../../Models/FacilityModel");
 const sgMail = require("@sendgrid/mail");
 const MessageModel = require("../../Models/MessageModel");
 const JobType = require("../../utils/constants/jobtype");
-const PhotoModel = require("../../Models/PhotoModel");
 
 exports.createJobPost = async (req, res) => {
   try {
@@ -128,12 +127,39 @@ exports.updateJobPost = async (req, res) => {
   }
 };
 
+exports.getJobPostById = async (req, res) => {
+  try {
+    const jobPost = await JobPostModel.findOne({ jobpost_id: req.params.id });
+    if (!jobPost) {
+      return res
+        .status(404)
+        .json({ message: "Job post not found", error: true });
+    }
+
+    // Fetch customer and facility details
+    const customer = await customerModel.findOne({
+      customer_id: jobPost.customer_id,
+    });
+    const facility = await facilityModel.findOne({
+      facility_id: jobPost.facility_id,
+    });
+
+    const jobPostWithDetails = {
+      ...jobPost.toObject(), // Convert MongoDB document to a plain object
+      customer_id: customer, // Include customer data
+      facility_id: facility, // Include facility data
+    };
+
+    res.status(200).json({ jobpost: jobPostWithDetails });
+  } catch (error) {
+    console.error("Error fetching job post by ID:", error);
+    res.status(500).json({ message: "サーバーエラー", error: true });
+  }
+};
+
 exports.getJobPostByUserById = async (req, res) => {
   try {
-    const jobPost = await JobPostModel.findOne({
-      jobpost_id: req.params.id,
-    }).lean();
-
+    const jobPost = await JobPostModel.findOne({ jobpost_id: req.params.id });
     if (!jobPost) {
       return res
         .status(404)
@@ -144,69 +170,6 @@ exports.getJobPostByUserById = async (req, res) => {
       return res.json({
         message: "この求人は承認されていない求人です。",
       });
-    }
-
-    // Fetch customer details
-    const customer = await customerModel
-      .findOne({ customer_id: jobPost.customer_id })
-      .lean();
-
-    if (!customer) {
-      return res
-        .status(404)
-        .json({ message: "Customer not found", error: true });
-    }
-
-    // Fetch customer pictures
-    const customerPictures = await PhotoModel.findOne({
-      customer_id: jobPost.customer_id,
-    }).lean();
-
-    // Fetch facility details
-    const facility = await facilityModel
-      .findOne({ facility_id: jobPost.facility_id })
-      .lean();
-
-    if (!facility) {
-      return res
-        .status(404)
-        .json({ message: "Facility not found", error: true });
-    }
-    // Map pictures with description from customer pictures
-    const pictures = jobPost.picture.map((picture) => {
-      const pictureWithDescription = customerPictures.images.find(
-        (customerPicture) => customerPicture.photoUrl === picture
-      );
-      return {
-        url: picture,
-        description: pictureWithDescription
-          ? pictureWithDescription.description
-          : "",
-      };
-    });
-
-    // Combine all fetched data into the response
-    const jobPostWithDetails = {
-      ...jobPost, // Convert MongoDB document to a plain object
-      customer_id: customer, // Include customer data
-      facility_id: facility, // Include facility data
-      picture: pictures, // Include picture details
-    };
-
-    res.status(200).json({ jobpost: jobPostWithDetails });
-  } catch (error) {
-    console.error("Error fetching job post by ID:", error);
-    res.status(500).json({ message: "サーバーエラー", error: true });
-  }
-};
-
-exports.getJobPostById = async (req, res) => {
-  try {
-    const jobPost = await JobPostModel.findOne({ jobpost_id: req.params.id });
-    if (!jobPost) {
-      return res
-        .status(404)
-        .json({ message: "Job post not found", error: true });
     }
 
     // Fetch customer and facility details
@@ -305,74 +268,127 @@ exports.updateJobPostStatus = async (req, res) => {
       facility_id: jobPost.facility_id,
     });
 
+    // Set your SendGrid API key
     sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-    const isAllowed = req.params.status === "allowed";
+    if (req.params.status === "allowed") {
+      const msg = {
+        to: customer.email,
+        from: "huskar020911@gmail.com", // Must be a verified sender on SendGrid
+        subject: "施設審査結果",
+        text: `差出人：ジョブジョブ運営事務局
+FROM：noreply@jobjob-jp.com
+件名：［ジョブジョブ］施設申請の審査結果
 
-    const subject = "［ジョブジョブ］求人申請の審査結果";
-    const loginUrl = "https://jobjob-jp.com/customers/sign_in";
-    const contactUrl = "https://jobjob-jp.com/customers/contact/";
-    const detailUrl = `https://jobjob-jp.com/facility/details/${req.params.id}`;
+この度はジョブジョブへの施設情報を登録いただき誠にありがとうございます。
 
-    const textBody = isAllowed
-      ? `この度はジョブジョブへの施設情報を登録いただき誠にありがとうございます。
+対象施設：${facility.name}。
+職種：${jobPost.type}。
+タイトル：${jobPost.sub_title}。
 
 ジョブジョブ運営事務局にて内容確認のうえ掲載を開始致しました。
 掲載ページはこちらからご確認ください。
-${detailUrl}
+施設ページのURLが入ります。
 
 こちらの施設での求人掲載は、下記よりログインのうえ求人登録をお願いします。
-${loginUrl}
+http://staging.jobjob-jp.com/customers/sign_in
 
-※このメールは送信専用です。ご返信いただいても対応できません。
-お問い合わせはこちら：
-${contactUrl}`
-      : `この度はジョブジョブへの施設情報を登録いただき誠にありがとうございます。
+本メールの送信アドレスは送信専用です。
+本メールに直接ご返信いただいてもご対応できかねますので、ご注意願います。
 
-内容確認の結果、不適切な表現や情報が含まれておりましたため差し戻しとさせていただきます。
-下記よりログインのうえ施設情報を修正し、再申請をお願いします。
-${loginUrl}
+当メールに関するお問い合わせについては下記へご連絡ください。
 
-※このメールは送信専用です。ご返信いただいても対応できません。
-お問い合わせはこちら：
-${contactUrl}`;
+----------------------------------------------------------------------
+【お問い合わせ先】
+ジョブジョブ運営事務局
+お問い合わせフォーム
+http://staging.jobjob-jp.com/customers/contact/
+----------------------------------------------------------------------
+`,
+        html: `
+        <p>差出人：ジョブジョブ運営事務局</p>
+        <p>FROM：noreply@jobjob-jp.com</p>
+        <p>件名：［ジョブジョブ］施設申請の審査結果</p>
+        <p>この度はジョブジョブへの施設情報を登録いただき誠にありがとうございます。</p>
+        <p>対象施設：<strong>${facility.name}</strong>。</p>
+        <p>職種：<strong>${jobPost.type}</strong>。</p>
+        <p>タイトル：<strong>${jobPost.sub_title}</strong>。</p>
+        <p>ジョブジョブ運営事務局にて内容確認のうえ掲載を開始致しました。</p>
+        <p>掲載ページはこちらからご確認ください。</p>
+        <p>施設ページのURLが入ります。</p>
+        <p>こちらの施設での求人掲載は、下記よりログインのうえ求人登録をお願いします。</p>
+        <p><a href="http://staging.jobjob-jp.com/customers/sign_in" target="_blank">http://staging.jobjob-jp.com/customers/sign_in</a></p>
+        <br/>
+        <p>本メールの送信アドレスは送信専用です。</p>
+        <p>本メールに直接ご返信いただいてもご対応できかねますので、ご注意願います。</p>
+        <br/>
+        <p>当メールに関するお問い合わせについては下記へご連絡ください。</p>
+        <hr>
+        <p><strong>【お問い合わせ先】</strong></p>
+        <p>ジョブジョブ運営事務局</p>
+        <p>お問い合わせフォーム</p>
+        <p><a href="http://staging.jobjob-jp.com/customers/contact/" target="_blank">http://staging.jobjob-jp.com/customers/contact/</a></p>`,
+      };
 
-    const htmlBody = isAllowed
-      ? `
-        <p style="margin: 0 0 8px;">この度はジョブジョブへの施設情報を登録いただき誠にありがとうございます。</p>
-        <p style="margin: 0 0 8px;">ジョブジョブ運営事務局にて内容確認のうえ掲載を開始致しました。</p>
-        <p style="margin: 0 0 8px;">掲載ページはこちらからご確認ください：<br/>
-        <a href="${detailUrl}" target="_blank">${detailUrl}</a></p>
-        <p style="margin: 0 0 8px;">こちらの施設での求人掲載は、下記よりログインのうえ求人登録をお願いします。<br/>
-        <a href="${loginUrl}" target="_blank">${loginUrl}</a></p>
-        <p style="margin: 0 0 8px;">※このメールは送信専用です。ご返信いただいても対応できません。</p>
-        <p style="margin: 0 0 8px;">お問い合わせはこちら：<br/>
-        <a href="${contactUrl}" target="_blank">${contactUrl}</a></p>
-      `
-      : `
-        <p style="margin: 0 0 8px;">この度はジョブジョブへの施設情報を登録いただき誠にありがとうございます。</p>
-        <p style="margin: 0 0 8px;">内容確認の結果、不適切な表現や情報が含まれておりましたため差し戻しとさせていただきます。</p>
-        <p style="margin: 0 0 8px;">下記よりログインのうえ施設情報を修正し、再申請をお願いします。<br/>
-        <a href="${loginUrl}" target="_blank">${loginUrl}</a></p>
-        <p style="margin: 0 0 8px;">※このメールは送信専用です。ご返信いただいても対応できません。</p>
-        <p style="margin: 0 0 8px;">お問い合わせはこちら：<br/>
-        <a href="${contactUrl}" target="_blank">${contactUrl}</a></p>
-      `;
+      await sgMail.send(msg);
+    } else if (req.params.status === "draft") {
+      const msg = {
+        to: customer.email,
+        from: "huskar020911@gmail.com", // Must be a verified sender on SendGrid
+        subject: "施設審査結果",
+        text: `差出人：ジョブジョブ運営事務局
+      FROM：noreply@jobjob-jp.com
+      件名：［ジョブジョブ］施設申請の審査結果
+      
+      この度はジョブジョブへの施設情報を登録いただき誠にありがとうございます。
+      
+      対象施設：${facility.name}。
+      職種：${jobPost.type}。
+      タイトル：${jobPost.sub_title}。
+      
+      ジョブジョブ運営事務局にて内容確認させていただいたところ、不適切な表現や情報が含まれておりますため差し戻しとさせていただきます。
+      お手数ですが、下記よりログインのうえ施設情報を修正いただき再度申請をお願いします。
+      http://staging.jobjob-jp.com/customers/sign_in
+      
+      
+      本メールの送信アドレスは送信専用です。
+      本メールに直接ご返信いただいてもご対応できかねますので、ご注意願います。
+      
+      当メールに関するお問い合わせについては下記へご連絡ください。
+      
+      ----------------------------------------------------------------------
+      【お問い合わせ先】
+      ジョブジョブ運営事務局
+      お問い合わせフォーム
+      http://staging.jobjob-jp.com/customers/contact/
+      ----------------------------------------------------------------------
+      `,
+        html: `
+              <p>差出人：ジョブジョブ運営事務局</p>
+              <p>FROM：noreply@jobjob-jp.com</p>
+              <p>件名：［ジョブジョブ］施設申請の審査結果</p>
+              <p>この度はジョブジョブへの施設情報を登録いただき誠にありがとうございます。</p>
+              <p>対象施設：<strong>${facility.name}</strong>。</p>
+              <p>職種：<strong>${jobPost.type}</strong>。</p>
+              <p>タイトル：<strong>${jobPost.sub_title}</strong>。</p>
+              <p>ジョブジョブ運営事務局にて内容確認させていただいたところ、不適切な表現や情報が含まれておりますため差し戻しとさせていただきます。</p>
+              <p>お手数ですが、下記よりログインのうえ施設情報を修正いただき再度申請をお願いします。</p>
+              <p><a href="http://staging.jobjob-jp.com/customers/sign_in" target="_blank">http://staging.jobjob-jp.com/customers/sign_in</a></p>
+              <br/>
+              <p>本メールの送信アドレスは送信専用です。</p>
+              <p>本メールに直接ご返信いただいてもご対応できかねますので、ご注意願います。</p>
+              <br/>
+              <p>当メールに関するお問い合わせについては下記へご連絡ください。</p>
+              <hr>
+              <p><strong>【お問い合わせ先】</strong></p>
+              <p>ジョブジョブ運営事務局</p>
+              <p>お問い合わせフォーム</p>
+              <p><a href="http://staging.jobjob-jp.com/customers/contact/" target="_blank">http://staging.jobjob-jp.com/customers/contact/</a></p>`,
+      };
 
-    const msg = {
-      to: customer.email,
-      from: {
-        email: "noreply@jobjob-jp.com", // Verify in SendGrid
-        name: "ジョブジョブ運営事務局",
-      },
-      subject: subject,
-      text: textBody,
-      html: htmlBody,
-    };
-
-    await sgMail.send(msg);
-
-    res.status(200).json({ message: "求人掲載申請完了", jobPost });
+      await sgMail.send(msg);
+    }
+    res.status(200).json({ message: "求人掲載申請完了", jobPost: jobPost });
   } catch (error) {
     res.status(500).json({ message: "サーバーエラー", error: true });
   }
@@ -382,7 +398,6 @@ exports.getFavourites = async (req, res) => {
   try {
     const jobPosts = await JobPostModel.find({
       jobpost_id: { $in: req.body.data },
-      allowed: "allowed",
     });
     // Resolve customer and facility data
     const jobPostsWithDetails = await Promise.all(
@@ -426,9 +441,6 @@ exports.getFilteredJobPosts = async (req, res) => {
       })
     );
     const filteredJobPosts = jobPostsWithDetails
-      .filter((jobpost) =>
-        filters.facility ? jobpost.facility_id.allowed === "allowed" : true
-      )
       .filter((jobpost) => jobpost.allowed === "allowed")
       .filter((jobpost) => jobpost.type === filters.JobType) // Filter by job type
       .filter((jobpost) =>
@@ -578,15 +590,11 @@ exports.getJobPostsNumbers = async (req, res) => {
 exports.getJobPostsByFacility = async (req, res) => {
   try {
     const { type } = req.body;
-    const jobPosts = await JobPostModel.find({
-      type: type,
-      allowed: "allowed",
-    });
+    const jobPosts = await JobPostModel.find({ type: type });
     const jobPostsWithDetails = await Promise.all(
       jobPosts.map(async (jobpost) => {
         const facility = await facilityModel.findOne({
           facility_id: jobpost.facility_id,
-          allowed: "allowed",
         });
         return {
           ...jobpost.toObject(), // Convert MongoDB document to plain object

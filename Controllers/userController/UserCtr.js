@@ -24,7 +24,7 @@ exports.register = async (req, res) => {
     const msg = {
       to: req.body.email,
       from: {
-        email: "huskar020911@gmail.com", // Using the verified email that works in your other controller
+        email: "noreply@jobjob-jp.com", // Using the verified email that works in your other controller
         name: "ジョブジョブ運営事務局",
       },
       subject: "［ジョブジョブ］新規会員登録完了のお知らせ",
@@ -53,12 +53,11 @@ exports.register = async (req, res) => {
     `].join("\n"),
       html: `
     <p style="margin: 5px 0; line-height: 1.2;">この度はジョブジョブに会員登録いただき誠にありがとうございます。</p>
+    <br/>
     <p style="margin: 5px 0; line-height: 1.2;">ID：<strong>ご登録のメールアドレス</strong></p>
     <br/>
     <p style="margin: 5px 0; line-height: 1.2;">パスワード：<strong>ご登録時に設定いただいたパスワード</strong></p>
-    <p style="margin: 5px 0; line-height: 1.2;">ID：<strong>ご登録のメールアドレス</strong></p>
     <br/>
-    <p style="margin: 5px 0; line-height: 1.2;">パスワード：<strong>ご登録時に設定いただいたパスワード</strong></p>
     <p style="margin: 5px 0; line-height: 1.2;">求人検索はこちら</p>
     <p style="margin: 5px 0; line-height: 1.2;"><a href="http://staging.jobjob-jp.com/" target="_blank">http://staging.jobjob-jp.com/</a></p>
     <p style="margin: 5px 0; line-height: 1.2;">マイページはこちら</p>
@@ -252,7 +251,7 @@ exports.forgotPasswordRequest = async (req, res) => {
     const msg = {
       to: req.body.email,
       from: {
-        email: "huskar020911@gmail.com",
+        email: "noreply@jobjob-jp.com",
         name: "ジョブジョブ運営事務局",
       },
       subject: "パスワードリセットのご案内",
