@@ -57,7 +57,6 @@ routes.forEach((file) => {
 });
 
 app.get("/", (req, res) => {
-  console.log("works");
   return res.json({ message: "works" });
 });
 

@@ -268,127 +268,74 @@ exports.updateJobPostStatus = async (req, res) => {
       facility_id: jobPost.facility_id,
     });
 
-    // Set your SendGrid API key
     sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-    if (req.params.status === "allowed") {
-      const msg = {
-        to: customer.email,
-        from: "huskar020911@gmail.com", // Must be a verified sender on SendGrid
-        subject: "施設審査結果",
-        text: `差出人：ジョブジョブ運営事務局
-FROM：noreply@jobjob-jp.com
-件名：［ジョブジョブ］施設申請の審査結果
+    const isAllowed = req.params.status === "allowed";
 
-この度はジョブジョブへの施設情報を登録いただき誠にありがとうございます。
+    const subject = "［ジョブジョブ］求人申請の審査結果";
+    const loginUrl = "https://jobjob-jp.com/customers/sign_in";
+    const contactUrl = "https://jobjob-jp.com/customers/contact/";
+    const detailUrl = `https://jobjob-jp.com/facility/details/${req.params.id}`;
 
-対象施設：${facility.name}。
-職種：${jobPost.type}。
-タイトル：${jobPost.sub_title}。
+    const textBody = isAllowed
+      ? `この度はジョブジョブへの施設情報を登録いただき誠にありがとうございます。
 
 ジョブジョブ運営事務局にて内容確認のうえ掲載を開始致しました。
 掲載ページはこちらからご確認ください。
-施設ページのURLが入ります。
+${detailUrl}
 
 こちらの施設での求人掲載は、下記よりログインのうえ求人登録をお願いします。
-http://142.132.202.228:3000/customers/sign_in
+${loginUrl}
 
-本メールの送信アドレスは送信専用です。
-本メールに直接ご返信いただいてもご対応できかねますので、ご注意願います。
+※このメールは送信専用です。ご返信いただいても対応できません。
+お問い合わせはこちら：
+${contactUrl}`
+      : `この度はジョブジョブへの施設情報を登録いただき誠にありがとうございます。
 
-当メールに関するお問い合わせについては下記へご連絡ください。
+内容確認の結果、不適切な表現や情報が含まれておりましたため差し戻しとさせていただきます。
+下記よりログインのうえ施設情報を修正し、再申請をお願いします。
+${loginUrl}
 
-----------------------------------------------------------------------
-【お問い合わせ先】
-ジョブジョブ運営事務局
-お問い合わせフォーム
-http://142.132.202.228:3000/customers/contact/
-----------------------------------------------------------------------
-`,
-        html: `
-        <p>差出人：ジョブジョブ運営事務局</p>
-        <p>FROM：noreply@jobjob-jp.com</p>
-        <p>件名：［ジョブジョブ］施設申請の審査結果</p>
-        <p>この度はジョブジョブへの施設情報を登録いただき誠にありがとうございます。</p>
-        <p>対象施設：<strong>${facility.name}</strong>。</p>
-        <p>職種：<strong>${jobPost.type}</strong>。</p>
-        <p>タイトル：<strong>${jobPost.sub_title}</strong>。</p>
-        <p>ジョブジョブ運営事務局にて内容確認のうえ掲載を開始致しました。</p>
-        <p>掲載ページはこちらからご確認ください。</p>
-        <p>施設ページのURLが入ります。</p>
-        <p>こちらの施設での求人掲載は、下記よりログインのうえ求人登録をお願いします。</p>
-        <p><a href="http://142.132.202.228:3000/customers/sign_in" target="_blank">http://142.132.202.228:3000/customers/sign_in</a></p>
-        <br/>
-        <p>本メールの送信アドレスは送信専用です。</p>
-        <p>本メールに直接ご返信いただいてもご対応できかねますので、ご注意願います。</p>
-        <br/>
-        <p>当メールに関するお問い合わせについては下記へご連絡ください。</p>
-        <hr>
-        <p><strong>【お問い合わせ先】</strong></p>
-        <p>ジョブジョブ運営事務局</p>
-        <p>お問い合わせフォーム</p>
-        <p><a href="http://142.132.202.228:3000/customers/contact/" target="_blank">http://142.132.202.228:3000/customers/contact/</a></p>`,
-      };
+※このメールは送信専用です。ご返信いただいても対応できません。
+お問い合わせはこちら：
+${contactUrl}`;
 
-      await sgMail.send(msg);
-    } else if (req.params.status === "draft") {
-      const msg = {
-        to: customer.email,
-        from: "huskar020911@gmail.com", // Must be a verified sender on SendGrid
-        subject: "施設審査結果",
-        text: `差出人：ジョブジョブ運営事務局
-      FROM：noreply@jobjob-jp.com
-      件名：［ジョブジョブ］施設申請の審査結果
-      
-      この度はジョブジョブへの施設情報を登録いただき誠にありがとうございます。
-      
-      対象施設：${facility.name}。
-      職種：${jobPost.type}。
-      タイトル：${jobPost.sub_title}。
-      
-      ジョブジョブ運営事務局にて内容確認させていただいたところ、不適切な表現や情報が含まれておりますため差し戻しとさせていただきます。
-      お手数ですが、下記よりログインのうえ施設情報を修正いただき再度申請をお願いします。
-      http://142.132.202.228:3000/customers/sign_in
-      
-      
-      本メールの送信アドレスは送信専用です。
-      本メールに直接ご返信いただいてもご対応できかねますので、ご注意願います。
-      
-      当メールに関するお問い合わせについては下記へご連絡ください。
-      
-      ----------------------------------------------------------------------
-      【お問い合わせ先】
-      ジョブジョブ運営事務局
-      お問い合わせフォーム
-      http://142.132.202.228:3000/customers/contact/
-      ----------------------------------------------------------------------
-      `,
-        html: `
-              <p>差出人：ジョブジョブ運営事務局</p>
-              <p>FROM：noreply@jobjob-jp.com</p>
-              <p>件名：［ジョブジョブ］施設申請の審査結果</p>
-              <p>この度はジョブジョブへの施設情報を登録いただき誠にありがとうございます。</p>
-              <p>対象施設：<strong>${facility.name}</strong>。</p>
-              <p>職種：<strong>${jobPost.type}</strong>。</p>
-              <p>タイトル：<strong>${jobPost.sub_title}</strong>。</p>
-              <p>ジョブジョブ運営事務局にて内容確認させていただいたところ、不適切な表現や情報が含まれておりますため差し戻しとさせていただきます。</p>
-              <p>お手数ですが、下記よりログインのうえ施設情報を修正いただき再度申請をお願いします。</p>
-              <p><a href="http://142.132.202.228:3000/customers/sign_in" target="_blank">http://142.132.202.228:3000/customers/sign_in</a></p>
-              <br/>
-              <p>本メールの送信アドレスは送信専用です。</p>
-              <p>本メールに直接ご返信いただいてもご対応できかねますので、ご注意願います。</p>
-              <br/>
-              <p>当メールに関するお問い合わせについては下記へご連絡ください。</p>
-              <hr>
-              <p><strong>【お問い合わせ先】</strong></p>
-              <p>ジョブジョブ運営事務局</p>
-              <p>お問い合わせフォーム</p>
-              <p><a href="http://142.132.202.228:3000/customers/contact/" target="_blank">http://142.132.202.228:3000/customers/contact/</a></p>`,
-      };
+    const htmlBody = isAllowed
+      ? `
+        <p style="margin: 0 0 8px;">この度はジョブジョブへの施設情報を登録いただき誠にありがとうございます。</p>
+        <p style="margin: 0 0 8px;">ジョブジョブ運営事務局にて内容確認のうえ掲載を開始致しました。</p>
+        <p style="margin: 0 0 8px;">掲載ページはこちらからご確認ください：<br/>
+        <a href="${detailUrl}" target="_blank">${detailUrl}</a></p>
+        <p style="margin: 0 0 8px;">こちらの施設での求人掲載は、下記よりログインのうえ求人登録をお願いします。<br/>
+        <a href="${loginUrl}" target="_blank">${loginUrl}</a></p>
+        <p style="margin: 0 0 8px;">※このメールは送信専用です。ご返信いただいても対応できません。</p>
+        <p style="margin: 0 0 8px;">お問い合わせはこちら：<br/>
+        <a href="${contactUrl}" target="_blank">${contactUrl}</a></p>
+      `
+      : `
+        <p style="margin: 0 0 8px;">この度はジョブジョブへの施設情報を登録いただき誠にありがとうございます。</p>
+        <p style="margin: 0 0 8px;">内容確認の結果、不適切な表現や情報が含まれておりましたため差し戻しとさせていただきます。</p>
+        <p style="margin: 0 0 8px;">下記よりログインのうえ施設情報を修正し、再申請をお願いします。<br/>
+        <a href="${loginUrl}" target="_blank">${loginUrl}</a></p>
+        <p style="margin: 0 0 8px;">※このメールは送信専用です。ご返信いただいても対応できません。</p>
+        <p style="margin: 0 0 8px;">お問い合わせはこちら：<br/>
+        <a href="${contactUrl}" target="_blank">${contactUrl}</a></p>
+      `;
 
-      await sgMail.send(msg);
-    }
-    res.status(200).json({ message: "求人掲載申請完了", jobPost: jobPost });
+    const msg = {
+      to: customer.email,
+      from: {
+        email: "noreply@jobjob-jp.com", // Verify in SendGrid
+        name: "ジョブジョブ運営事務局",
+      },
+      subject: subject,
+      text: textBody,
+      html: htmlBody,
+    };
+
+    await sgMail.send(msg);
+
+    res.status(200).json({ message: "求人掲載申請完了", jobPost });
   } catch (error) {
     res.status(500).json({ message: "サーバーエラー", error: true });
   }
