@@ -291,7 +291,7 @@ FROM：noreply@jobjob-jp.com
 施設ページのURLが入ります。
 
 こちらの施設での求人掲載は、下記よりログインのうえ求人登録をお願いします。
-http://142.132.202.228:3000/customers/sign_in
+http://staging.jobjob-jp.com/customers/sign_in
 
 本メールの送信アドレスは送信専用です。
 本メールに直接ご返信いただいてもご対応できかねますので、ご注意願います。
@@ -302,7 +302,7 @@ http://142.132.202.228:3000/customers/sign_in
 【お問い合わせ先】
 ジョブジョブ運営事務局
 お問い合わせフォーム
-http://142.132.202.228:3000/customers/contact/
+http://staging.jobjob-jp.com/customers/contact/
 ----------------------------------------------------------------------
 `,
         html: `
@@ -317,7 +317,7 @@ http://142.132.202.228:3000/customers/contact/
         <p>掲載ページはこちらからご確認ください。</p>
         <p>施設ページのURLが入ります。</p>
         <p>こちらの施設での求人掲載は、下記よりログインのうえ求人登録をお願いします。</p>
-        <p><a href="http://142.132.202.228:3000/customers/sign_in" target="_blank">http://142.132.202.228:3000/customers/sign_in</a></p>
+        <p><a href="http://staging.jobjob-jp.com/customers/sign_in" target="_blank">http://staging.jobjob-jp.com/customers/sign_in</a></p>
         <br/>
         <p>本メールの送信アドレスは送信専用です。</p>
         <p>本メールに直接ご返信いただいてもご対応できかねますので、ご注意願います。</p>
@@ -327,7 +327,7 @@ http://142.132.202.228:3000/customers/contact/
         <p><strong>【お問い合わせ先】</strong></p>
         <p>ジョブジョブ運営事務局</p>
         <p>お問い合わせフォーム</p>
-        <p><a href="http://142.132.202.228:3000/customers/contact/" target="_blank">http://142.132.202.228:3000/customers/contact/</a></p>`,
+        <p><a href="http://staging.jobjob-jp.com/customers/contact/" target="_blank">http://staging.jobjob-jp.com/customers/contact/</a></p>`,
       };
 
       await sgMail.send(msg);
@@ -348,7 +348,7 @@ http://142.132.202.228:3000/customers/contact/
       
       ジョブジョブ運営事務局にて内容確認させていただいたところ、不適切な表現や情報が含まれておりますため差し戻しとさせていただきます。
       お手数ですが、下記よりログインのうえ施設情報を修正いただき再度申請をお願いします。
-      http://142.132.202.228:3000/customers/sign_in
+      http://staging.jobjob-jp.com/customers/sign_in
       
       
       本メールの送信アドレスは送信専用です。
@@ -360,7 +360,7 @@ http://142.132.202.228:3000/customers/contact/
       【お問い合わせ先】
       ジョブジョブ運営事務局
       お問い合わせフォーム
-      http://142.132.202.228:3000/customers/contact/
+      http://staging.jobjob-jp.com/customers/contact/
       ----------------------------------------------------------------------
       `,
         html: `
@@ -373,7 +373,7 @@ http://142.132.202.228:3000/customers/contact/
               <p>タイトル：<strong>${jobPost.sub_title}</strong>。</p>
               <p>ジョブジョブ運営事務局にて内容確認させていただいたところ、不適切な表現や情報が含まれておりますため差し戻しとさせていただきます。</p>
               <p>お手数ですが、下記よりログインのうえ施設情報を修正いただき再度申請をお願いします。</p>
-              <p><a href="http://142.132.202.228:3000/customers/sign_in" target="_blank">http://142.132.202.228:3000/customers/sign_in</a></p>
+              <p><a href="http://staging.jobjob-jp.com/customers/sign_in" target="_blank">http://staging.jobjob-jp.com/customers/sign_in</a></p>
               <br/>
               <p>本メールの送信アドレスは送信専用です。</p>
               <p>本メールに直接ご返信いただいてもご対応できかねますので、ご注意願います。</p>
@@ -383,7 +383,7 @@ http://142.132.202.228:3000/customers/contact/
               <p><strong>【お問い合わせ先】</strong></p>
               <p>ジョブジョブ運営事務局</p>
               <p>お問い合わせフォーム</p>
-              <p><a href="http://142.132.202.228:3000/customers/contact/" target="_blank">http://142.132.202.228:3000/customers/contact/</a></p>`,
+              <p><a href="http://staging.jobjob-jp.com/customers/contact/" target="_blank">http://staging.jobjob-jp.com/customers/contact/</a></p>`,
       };
 
       await sgMail.send(msg);

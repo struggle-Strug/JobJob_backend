@@ -78,7 +78,7 @@ http://staging.jobjob-jp.com/members/job_offers/apply
 【お問い合わせ先】
 ジョブジョブ運営事務局
 お問い合わせフォーム
-http://142.132.202.228:3000/customers/contact/
+http://staging.jobjob-jp.com/customers/contact/
 ----------------------------------------------------------------------
 `,
       html: `
@@ -113,7 +113,7 @@ http://142.132.202.228:3000/customers/contact/
         <p><strong>【お問い合わせ先】</strong></p>
         <p>ジョブジョブ運営事務局</p>
         <p>お問い合わせフォーム</p>
-        <p><a href="http://142.132.202.228:3000/customers/contact/" target="_blank">http://142.132.202.228:3000/customers/contact/</a></p>`,
+        <p><a href="http://staging.jobjob-jp.com/customers/contact/" target="_blank">http://staging.jobjob-jp.com/customers/contact/</a></p>`,
     };
 
     const msg_1 = {
