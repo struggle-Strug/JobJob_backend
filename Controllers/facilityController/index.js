@@ -275,7 +275,7 @@ exports.updateFacilityStatus = async (req, res) => {
       
       ジョブジョブ運営事務局にて内容確認のうえ掲載を開始致しました。
       掲載ページはこちらからご確認ください。
-      http://staging.jobjob-jp.com/facility/details/${req.params.id}
+      http://staging.jobjob-jp.com/facility/${req.params.id}
       
       こちらの施設での求人掲載は、下記よりログインのうえ求人登録をお願いします。
       http://staging.jobjob-jp.com/customers/sign_in
@@ -291,7 +291,7 @@ exports.updateFacilityStatus = async (req, res) => {
           <p>対象施設：<strong>${facility.name}</strong></p>
           <p>ジョブジョブ運営事務局にて内容確認のうえ掲載を開始致しました。</p>
           <p>掲載ページはこちらからご確認ください：<br/>
-          <a href="http://staging.jobjob-jp.com/facility/details/${req.params.id}" target="_blank">施設詳細ページ</a></p>
+          <a href="http://staging.jobjob-jp.com/facility/${req.params.id}" target="_blank">施設詳細ページ</a></p>
           <p>求人掲載は以下よりログインしてください：<br/>
           <a href="http://staging.jobjob-jp.com/customers/sign_in" target="_blank">ログインページ</a></p>
           <br/>
