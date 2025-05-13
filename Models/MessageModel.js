@@ -54,6 +54,10 @@ const MessageModel = new mongoose.Schema({
     type: String,
     default: "",
   },
+  unread: {
+    type: Boolean,
+    default: true,
+  },
   deleted: {
     type: Boolean,
     default: false,
