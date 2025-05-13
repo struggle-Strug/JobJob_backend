@@ -562,6 +562,16 @@ exports.getCertainMessageByCompany = async (req, res) => {
       return res.json({ message: "メッセージが見つかりません。", error: true });
     }
 
+    // ✅ Update the unread field manually in the database
+    const updateResult = await MessageModel.updateOne(
+      { _id: id },
+      { $set: { unread: false } }
+    );
+
+    if (updateResult.nModified === 0) {
+      return res.status(400).json({ message: "Failed to mark as read." });
+    }
+
     // ✅ Fetch jobPost related to the message
     const jobPost = await JobPostModel.findOne({
       jobpost_id: certainMessage.jobPost_id,
@@ -582,6 +592,7 @@ exports.getCertainMessageByCompany = async (req, res) => {
     const user =
       (await UserModel.findOne({ _id: certainMessage.first }).lean()) || null;
 
+    // After everything is complete, return the response
     return res.json({
       message: "取得成功",
       messageDetails: {

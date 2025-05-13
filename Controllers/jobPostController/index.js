@@ -441,9 +441,6 @@ exports.getFilteredJobPosts = async (req, res) => {
       })
     );
     const filteredJobPosts = jobPostsWithDetails
-      .filter((jobpost) =>
-        filters.facility ? jobpost.facility_id.allowed === "allowed" : true
-      )
       .filter((jobpost) => jobpost.allowed === "allowed")
       .filter((jobpost) => jobpost.type === filters.JobType) // Filter by job type
       .filter((jobpost) =>
@@ -593,15 +590,11 @@ exports.getJobPostsNumbers = async (req, res) => {
 exports.getJobPostsByFacility = async (req, res) => {
   try {
     const { type } = req.body;
-    const jobPosts = await JobPostModel.find({
-      type: type,
-      allowed: "allowed",
-    });
+    const jobPosts = await JobPostModel.find({ type: type });
     const jobPostsWithDetails = await Promise.all(
       jobPosts.map(async (jobpost) => {
         const facility = await facilityModel.findOne({
           facility_id: jobpost.facility_id,
-          allowed: "allowed",
         });
         return {
           ...jobpost.toObject(), // Convert MongoDB document to plain object

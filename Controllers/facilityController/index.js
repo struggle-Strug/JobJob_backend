@@ -52,7 +52,9 @@ exports.getFacilities = async (req, res) => {
     filter.allowed = "allowed";
 
     // Fetch facilities based on basic filters (without jobType filter)
-    const facilities = await FacilityModel.find(filter).lean();
+    const facilities = await FacilityModel.find(filter)
+      .sort({ created_at: -1 })
+      .lean();
 
     // Fetch job posts for each facility
     const facilitiesWithDetails = await Promise.all(
@@ -262,69 +264,53 @@ exports.updateFacilityStatus = async (req, res) => {
     if (req.params.status === "allowed") {
       const msg = {
         to: customer.email,
-        from: "huskar020911@gmail.com", // Must be a verified sender on SendGrid
-        subject: "施設審査結果",
-        text: `ジョブジョブ運営事務局
-noreply@jobjob-jp.com
-［ジョブジョブ］施設申請の審査結果
-
-この度はジョブジョブへの施設情報を登録いただき誠にありがとうございます。
-
-対象施設：${facility.name}
-
-ジョブジョブ運営事務局にて内容確認のうえ掲載を開始致しました。
-掲載ページはこちらからご確認ください。
-http://staging.jobjob-jp.com/facility/details/${req.params.id}
-
-こちらの施設での求人掲載は、下記よりログインのうえ求人登録をお願いします。
-http://staging.jobjob-jp.com/customers/sign_in
-
-本メールの送信アドレスは送信専用です。
-本メールに直接ご返信いただいてもご対応できかねますので、ご注意願います。
-
-当メールに関するお問い合わせについては下記へご連絡ください。
-
-----------------------------------------------------------------------
-【お問い合わせ先】
-ジョブジョブ運営事務局
-お問い合わせフォーム
-http://staging.jobjob-jp.com/customers/contact/
-----------------------------------------------------------------------
-`,
+        from: {
+          email: "huskar020911@gmail.com", // Verified sender
+          name: "ジョブジョブ運営事務局",
+        },
+        subject: "[ジョブジョブ] 施設申請の審査結果",
+        text: `この度はジョブジョブへの施設情報を登録いただき誠にありがとうございます。
+      
+      対象施設：${facility.name}
+      
+      ジョブジョブ運営事務局にて内容確認のうえ掲載を開始致しました。
+      掲載ページはこちらからご確認ください。
+      http://staging.jobjob-jp.com/facility/details/${req.params.id}
+      
+      こちらの施設での求人掲載は、下記よりログインのうえ求人登録をお願いします。
+      http://staging.jobjob-jp.com/customers/sign_in
+      
+      本メールの送信アドレスは送信専用です。
+      本メールに直接ご返信いただいてもご対応できかねますので、ご注意願います。
+      
+      当メールに関するお問い合わせについては下記へご連絡ください。
+      http://staging.jobjob-jp.com/customers/contact/
+      `,
         html: `
-        <p>ジョブジョブ運営事務局</p>
-        <p>noreply@jobjob-jp.com</p>
-        <p>［ジョブジョブ］施設申請の審査結果</p>
-        <p>この度はジョブジョブへの施設情報を登録いただき誠にありがとうございます。</p>
-        <p>対象施設：<strong>${facility.name}</strong></p>
-        <p>ジョブジョブ運営事務局にて内容確認のうえ掲載を開始致しました。</p>
-        <p>掲載ページはこちらからご確認ください。</p>
-        <p><a href="http://staging.jobjob-jp.com/facility/details/${req.params.id}" target="_blank">http://staging.jobjob-jp.com/facility/details/${req.params.id}</a></p>
-        <p>こちらの施設での求人掲載は、下記よりログインのうえ求人登録をお願いします。</p>
-        <p><a href="http://staging.jobjob-jp.com/customers/sign_in" target="_blank">http://staging.jobjob-jp.com/customers/sign_in</a></p>
-        <br/>
-        <p>本メールの送信アドレスは送信専用です。</p>
-        <p>本メールに直接ご返信いただいてもご対応できかねますので、ご注意願います。</p>
-        <br/>
-        <p>当メールに関するお問い合わせについては下記へご連絡ください。</p>
-        <hr>
-        <p><strong>【お問い合わせ先】</strong></p>
-        <p>ジョブジョブ運営事務局</p>
-        <p>お問い合わせフォーム</p>
-        <p><a href="http://staging.jobjob-jp.com/customers/contact/" target="_blank">http://staging.jobjob-jp.com/customers/contact/</a></p>`,
+          <p>この度はジョブジョブへの施設情報を登録いただき誠にありがとうございます。</p>
+          <p>対象施設：<strong>${facility.name}</strong></p>
+          <p>ジョブジョブ運営事務局にて内容確認のうえ掲載を開始致しました。</p>
+          <p>掲載ページはこちらからご確認ください：<br/>
+          <a href="http://staging.jobjob-jp.com/facility/details/${req.params.id}" target="_blank">施設詳細ページ</a></p>
+          <p>求人掲載は以下よりログインしてください：<br/>
+          <a href="http://staging.jobjob-jp.com/customers/sign_in" target="_blank">ログインページ</a></p>
+          <br/>
+          <p>※このメールは送信専用です。ご返信いただいても対応できかねますのでご了承ください。</p>
+          <p>お問い合わせは以下フォームよりお願いいたします。<br/>
+          <a href="http://staging.jobjob-jp.com/customers/contact/" target="_blank">お問い合わせフォーム</a></p>
+        `,
       };
 
       await sgMail.send(msg);
     } else if (req.params.status === "rejected") {
       const msg = {
         to: customer.email,
-        from: "huskar020911@gmail.com", // Must be a verified sender on SendGrid
-        subject: "施設審査結果",
-        text: `ジョブジョブ運営事務局
-noreply@jobjob-jp.com
-［ジョブジョブ］施設申請の審査結果
-
-この度はジョブジョブへの施設情報を登録いただき誠にありがとうございます。
+        from: {
+          email: "huskar020911@gmail.com",
+          name: "ジョブジョブ運営事務局",
+        }, // Must be a verified sender on SendGrid
+        subject: "[ジョブジョブ] 施設申請の審査結果",
+        text: `この度はジョブジョブへの施設情報を登録いただき誠にありがとうございます。
 
 対象施設：${facility.name}
 
@@ -346,9 +332,6 @@ http://staging.jobjob-jp.com/customers/contact/
 ----------------------------------------------------------------------
 `,
         html: `
-        <p>ジョブジョブ運営事務局</p>
-        <p>noreply@jobjob-jp.com</p>
-        <p>［ジョブジョブ］施設申請の審査結果</p>
         <p>この度はジョブジョブへの施設情報を登録いただき誠にありがとうございます。</p>
         <p>対象施設：<strong>${facility.name}</strong></p>
         <p>ジョブジョブ運営事務局にて内容確認させていただいたところ、不適切な表現や情報が含まれておりますため差し戻しとさせていただきます。</p>
