@@ -4,6 +4,7 @@ const facilityModel = require("../../Models/FacilityModel");
 const sgMail = require("@sendgrid/mail");
 const MessageModel = require("../../Models/MessageModel");
 const JobType = require("../../utils/constants/jobtype");
+const PhotoModel = require("../../Models/PhotoModel");
 
 exports.createJobPost = async (req, res) => {
   try {
@@ -180,10 +181,27 @@ exports.getJobPostByUserById = async (req, res) => {
       facility_id: jobPost.facility_id,
     });
 
+    const customerPictures = await PhotoModel.findOne({
+      customer_id: jobPost.customer_id,
+    }).lean();
+
+    const pictures = jobPost.picture.map((picture) => {
+      const pictureWithDescription = customerPictures.images.find(
+        (customerPicture) => customerPicture.photoUrl === picture
+      );
+      return {
+        url: picture,
+        description: pictureWithDescription
+          ? pictureWithDescription.description
+          : "",
+      };
+    });
+
     const jobPostWithDetails = {
       ...jobPost.toObject(), // Convert MongoDB document to a plain object
       customer_id: customer, // Include customer data
       facility_id: facility, // Include facility data
+      picture: pictures,
     };
 
     res.status(200).json({ jobpost: jobPostWithDetails });
