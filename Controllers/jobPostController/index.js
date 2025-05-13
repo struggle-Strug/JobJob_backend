@@ -4,6 +4,7 @@ const facilityModel = require("../../Models/FacilityModel");
 const sgMail = require("@sendgrid/mail");
 const MessageModel = require("../../Models/MessageModel");
 const JobType = require("../../utils/constants/jobtype");
+const PhotoModel = require("../../Models/PhotoModel");
 
 exports.createJobPost = async (req, res) => {
   try {
@@ -127,39 +128,12 @@ exports.updateJobPost = async (req, res) => {
   }
 };
 
-exports.getJobPostById = async (req, res) => {
-  try {
-    const jobPost = await JobPostModel.findOne({ jobpost_id: req.params.id });
-    if (!jobPost) {
-      return res
-        .status(404)
-        .json({ message: "Job post not found", error: true });
-    }
-
-    // Fetch customer and facility details
-    const customer = await customerModel.findOne({
-      customer_id: jobPost.customer_id,
-    });
-    const facility = await facilityModel.findOne({
-      facility_id: jobPost.facility_id,
-    });
-
-    const jobPostWithDetails = {
-      ...jobPost.toObject(), // Convert MongoDB document to a plain object
-      customer_id: customer, // Include customer data
-      facility_id: facility, // Include facility data
-    };
-
-    res.status(200).json({ jobpost: jobPostWithDetails });
-  } catch (error) {
-    console.error("Error fetching job post by ID:", error);
-    res.status(500).json({ message: "サーバーエラー", error: true });
-  }
-};
-
 exports.getJobPostByUserById = async (req, res) => {
   try {
-    const jobPost = await JobPostModel.findOne({ jobpost_id: req.params.id });
+    const jobPost = await JobPostModel.findOne({
+      jobpost_id: req.params.id,
+    }).lean();
+
     if (!jobPost) {
       return res
         .status(404)
@@ -170,6 +144,69 @@ exports.getJobPostByUserById = async (req, res) => {
       return res.json({
         message: "この求人は承認されていない求人です。",
       });
+    }
+
+    // Fetch customer details
+    const customer = await customerModel
+      .findOne({ customer_id: jobPost.customer_id })
+      .lean();
+
+    if (!customer) {
+      return res
+        .status(404)
+        .json({ message: "Customer not found", error: true });
+    }
+
+    // Fetch customer pictures
+    const customerPictures = await PhotoModel.findOne({
+      customer_id: jobPost.customer_id,
+    }).lean();
+
+    // Fetch facility details
+    const facility = await facilityModel
+      .findOne({ facility_id: jobPost.facility_id })
+      .lean();
+
+    if (!facility) {
+      return res
+        .status(404)
+        .json({ message: "Facility not found", error: true });
+    }
+    // Map pictures with description from customer pictures
+    const pictures = jobPost.picture.map((picture) => {
+      const pictureWithDescription = customerPictures.images.find(
+        (customerPicture) => customerPicture.photoUrl === picture
+      );
+      return {
+        url: picture,
+        description: pictureWithDescription
+          ? pictureWithDescription.description
+          : "",
+      };
+    });
+
+    // Combine all fetched data into the response
+    const jobPostWithDetails = {
+      ...jobPost, // Convert MongoDB document to a plain object
+      customer_id: customer, // Include customer data
+      facility_id: facility, // Include facility data
+      picture: pictures, // Include picture details
+    };
+
+    res.status(200).json({ jobpost: jobPostWithDetails });
+  } catch (error) {
+    console.error("Error fetching job post by ID:", error);
+    res.status(500).json({ message: "サーバーエラー", error: true });
+  }
+};
+
+exports.getJobPostById = async (req, res) => {
+  try {
+    const jobPost = await JobPostModel.findOne({ jobpost_id: req.params.id });
+    if (!jobPost) {
+      return res
+        .status(404)
+        .json({ message: "Job post not found", error: true });
     }
 
     // Fetch customer and facility details
