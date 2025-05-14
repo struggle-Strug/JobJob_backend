@@ -35,7 +35,7 @@ exports.register = async (req, res) => {
     パスワード：${req.body.password}。
     
     求人検索はこちら
-    http://staging.jobjob-jp.com/
+    http://staging.jobjob-jp.com/members/register_complete
     マイページはこちら
     http://staging.jobjob-jp.com/members/mypage
     
