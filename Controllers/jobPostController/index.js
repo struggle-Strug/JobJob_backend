@@ -608,7 +608,10 @@ exports.getJobPostsNumbers = async (req, res) => {
 exports.getJobPostsByFacility = async (req, res) => {
   try {
     const { type } = req.body;
-    const jobPosts = await JobPostModel.find({ type: type });
+    const jobPosts = await JobPostModel.find({
+      type: type,
+      allowed: "allowed",
+    });
     const jobPostsWithDetails = await Promise.all(
       jobPosts.map(async (jobpost) => {
         const facility = await facilityModel.findOne({
