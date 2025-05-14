@@ -131,7 +131,9 @@ exports.getCustomerFacilties = async (req, res) => {
       filter.customer_id = { $in: customerIds }; // Always include this condition
 
       if (Object.keys(req.query).length === 0) {
-        const facilities = await FacilityModel.find(filter);
+        const facilities = await FacilityModel.find(filter).sort({
+          created_at: -1,
+        });
         return res
           .status(200)
           .json({ message: "施設取得成功", facility: facilities });
