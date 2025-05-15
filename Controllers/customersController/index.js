@@ -200,7 +200,10 @@ exports.getUsers = async (req, res) => {
     const users = await Customer.find({
       companyName: req.user.data.companyName,
     });
-    res.status(200).json({ message: "ユーザー一覧取得成功", users: users });
+    res.status(200).json({
+      message: "ユーザー一覧取得成功",
+      users: users.slice(1, users.length),
+    });
   } catch (error) {
     res.status(500).json({ message: "サーバーエラー", error: true });
   }

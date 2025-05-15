@@ -1,22 +1,22 @@
 const mongoose = require("mongoose");
 
 const PhotoModel = mongoose.Schema({
-  customer_id: {
+  companyName: {
     type: String,
     required: true,
   },
   images: [
     {
       photoName: {
-          type: String
+        type: String,
       },
       photoUrl: {
-        type: String
+        type: String,
       },
       description: {
-          type: String
-      }
-    }
+        type: String,
+      },
+    },
   ],
 });
 
