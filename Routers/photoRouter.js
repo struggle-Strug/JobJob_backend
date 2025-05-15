@@ -3,7 +3,7 @@ const requireAuth = require("../Middleware/RequireAuth");
 
 const photoController = require("../Controllers/photoController/index");
 
-router.post("/", requireAuth, photoController.save);
+router.post("/", photoController.save);
 router.delete(
   "/:imageName",
   requireAuth,

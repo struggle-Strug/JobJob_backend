@@ -1,34 +1,22 @@
+const CustomerModel = require("../../Models/CustomerModel");
 const PhotoModel = require("../../Models/PhotoModel");
 
 exports.save = async (req, res) => {
   try {
+    const { companyName } = req.body;
     const photos = await PhotoModel.findOne({
-      customer_id: req.user.data.customer_id,
+      companyName: companyName,
     });
 
     if (photos == null) {
       const newPhotos = new PhotoModel({
-        customer_id: req.user.data.customer_id,
-        images: req.body.map((image) => ({
-          photoName: image.fileName,
-          photoUrl: image.fileUrl,
-          description: "",
-        })),
+        companyName: companyName,
+        images: [],
       });
 
       await newPhotos.save();
       return res.json({ message: "保存しました", photos: newPhotos });
     }
-
-    // Append new photos to the existing images array
-    const newImages = req.body.map((image) => ({
-      photoName: image.fileName,
-      photoUrl: image.fileUrl,
-      description: "",
-    }));
-
-    photos.images.push(...newImages);
-    await photos.save();
 
     return res.json({ message: "写真を追加しました", photos });
   } catch (error) {
@@ -38,8 +26,12 @@ exports.save = async (req, res) => {
 
 exports.getPhotosByCustomerId = async (req, res) => {
   try {
-    const photos = await PhotoModel.findOne({
+    const customer = await CustomerModel.findOne({
       customer_id: req.user.data.customer_id,
+    });
+
+    const photos = await PhotoModel.findOne({
+      companyName: customer.companyName,
     });
 
     return res.json({ message: "取得しました", photos: photos });
@@ -53,8 +45,12 @@ exports.updateDescription = async (req, res) => {
     const { description } = req.body;
     const photoId = req.params.id;
 
-    const photos = await PhotoModel.findOne({
+    const customer = await CustomerModel.findOne({
       customer_id: req.user.data.customer_id,
+    });
+
+    const photos = await PhotoModel.findOne({
+      companyName: customer.companyName,
     });
 
     const photo = photos.images.find(
@@ -76,8 +72,11 @@ exports.updateDescription = async (req, res) => {
 
 exports.updateImages = async (req, res) => {
   try {
-    const photos = await PhotoModel.findOne({
+    const customer = await CustomerModel.findOne({
       customer_id: req.user.data.customer_id,
+    });
+    const photos = await PhotoModel.findOne({
+      companyName: customer.companyName,
     });
 
     photos.images = [
@@ -100,8 +99,11 @@ exports.updateImages = async (req, res) => {
 
 exports.deleteImageByCustomerId = async (req, res) => {
   try {
-    const photos = await PhotoModel.findOne({
+    const customer = await CustomerModel.findOne({
       customer_id: req.user.data.customer_id,
+    });
+    const photos = await PhotoModel.findOne({
+      companyName: customer.companyName,
     });
     const backendUrl = `${req.protocol}://${req.get("host")}`;
     const imageNameToDelete = `${backendUrl}/uploads/${req.params.imageName}`;
