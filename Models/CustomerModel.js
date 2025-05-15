@@ -9,6 +9,7 @@ const customerSchema = new mongoose.Schema({
   phoneNumber: { type: String },
   email: { type: String, required: true },
   password: { type: String },
+  initialPassword: { type: String },
   role: { type: String, default: "customer" },
   // allowed: { type: Boolean, default: false },
   registrationDate: { type: Date },
