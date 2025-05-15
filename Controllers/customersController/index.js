@@ -32,6 +32,7 @@ exports.signup = async (req, res) => {
       phoneNumber: req.body.phoneNumber,
       email: req.body.email,
       password: hashedPassword,
+      initialPassword: initalPassword,
       registrationDate: new Date(),
     });
     await newCustomer.save();
