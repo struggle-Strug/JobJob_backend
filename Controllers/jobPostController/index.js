@@ -458,18 +458,25 @@ exports.getFilteredJobPosts = async (req, res) => {
         };
       })
     );
+    console.log(jobPostsWithDetails[0]);
     const filteredJobPosts = jobPostsWithDetails
       .filter((jobpost) => jobpost.allowed === "allowed")
       .filter((jobpost) => jobpost.type === filters.JobType) // Filter by job type
       .filter((jobpost) =>
-        filters.facility ? jobpost.facility_id.name === filters.facility : true
+        filters.facility
+          ? jobpost.facility_id && jobpost.facility_id.name === filters.facility
+          : true
       ) // Filter by facility
       .filter((jobpost) =>
-        filters.pref ? jobpost.facility_id.prefecture === filters.pref : true
+        filters.pref
+          ? jobpost.facility_id &&
+            jobpost.facility_id.prefecture === filters.pref
+          : true
       ) // Filter by prefecture
-      .filter(
-        (jobpost) =>
-          filters.muni !== "" ? jobpost.facility_id.city === filters.muni : true // Filter by municipality
+      .filter((jobpost) =>
+        filters.muni !== ""
+          ? jobpost.facility_id && jobpost.facility_id.city === filters.muni
+          : true
       )
       .filter(
         (jobpost) =>
