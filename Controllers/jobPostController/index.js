@@ -11,13 +11,21 @@ exports.createJobPost = async (req, res) => {
     const jobPosts = await JobPostModel.find({});
     const lastJobPost = jobPosts[jobPosts.length - 1];
 
+    const customer = await customerModel.findOne({
+      customer_id: req.body.customer_id,
+    });
+
+    const customers = await customerModel.find({
+      companyName: customer.companyName,
+    });
+
     // ✅ Determine the new jobpost_id
     const newJobPostId = lastJobPost ? Number(lastJobPost.jobpost_id) + 1 : 1;
 
     // ✅ Create new job post
     const newJobPost = new JobPostModel({
       facility_id: req.body.facility_id,
-      customer_id: req.body.customer_id,
+      customer_id: customers[0].customer_id,
       jobpost_id: newJobPostId, // ✅ Correctly assigned unique ID
       type: req.body.type,
       picture: req.body.picture,
@@ -68,12 +76,20 @@ exports.createJobPostByCopy = async (req, res) => {
     const jobPosts = await JobPostModel.find({});
     const lastJobPost = jobPosts[jobPosts.length - 1];
 
+    const customer = await customerModel.findOne({
+      customer_id: req.user.data.customer_id,
+    });
+
+    const customers = await customerModel.find({
+      companyName: customer.companyName,
+    });
+
     // ✅ Determine the new jobpost_id
     const newJobPostId = lastJobPost ? Number(lastJobPost.jobpost_id) + 1 : 1;
     // Create a new job post instance
     const newJobPost = new JobPostModel({
       facility_id: facility_id,
-      customer_id: req.user.data.customer_id,
+      customer_id: customers[0].customer_id,
       jobpost_id: newJobPostId,
       type: jobPost.type,
       picture: jobPost.picture,
