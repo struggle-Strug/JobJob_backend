@@ -124,8 +124,18 @@ http://staging.jobjob-jp.com/customers/contact/
       html: `<strong>応募が完了しました。</strong>`,
     };
 
-    await sgMail.send(msg);
-    await sgMail.send(msg_1);
+    try {
+      await sgMail.send(msg);
+      await sgMail.send(msg_1);
+      console.log("Email sent successfully");
+    } catch (emailError) {
+      console.error("SendGrid Error:", emailError);
+      // Continue with registration even if email fails
+      if (emailError.response) {
+        console.error("Error body:", emailError.response.body);
+      }
+    }
+
     res.status(200).json({ message: "応募が完了しました。" });
   } catch (error) {
     console.log(error);

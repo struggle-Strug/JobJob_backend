@@ -140,7 +140,7 @@ exports.tokenlogin = async (req, res) => {
 
 exports.getAllCustomers = async (req, res) => {
   try {
-    const customers = await Customer.find();
+    const customers = await Customer.find().sort({ registrationDate: -1 });
     const facilities = await Facility.find({ allowed: "allowed" });
     const jobposts = await JobPost.find({ allowed: "allowed" });
     res.status(200).json({
@@ -200,10 +200,10 @@ exports.getUsers = async (req, res) => {
   try {
     const users = await Customer.find({
       companyName: req.user.data.companyName,
-    });
+    }).sort({ createdAt: -1 });
     res.status(200).json({
       message: "ユーザー一覧取得成功",
-      users: users.slice(1, users.length),
+      users: users,
     });
   } catch (error) {
     res.status(500).json({ message: "サーバーエラー", error: true });
@@ -213,7 +213,8 @@ exports.getUsers = async (req, res) => {
 exports.addUser = async (req, res) => {
   try {
     const customers = await Customer.find();
-    const customer_id = customers.length + 1;
+    const lastCustomer = customers[customers.length - 1];
+    const customer_id = lastCustomer ? Number(lastCustomer.customer_id) + 1 : 1;
 
     const newCustomer = new Customer({
       customer_id: customer_id,
@@ -223,6 +224,7 @@ exports.addUser = async (req, res) => {
       huriganaContactPerson: req.body.huriganaContactPerson,
       phoneNumber: req.body.phoneNumber,
       email: req.body.email,
+      initialPassword: req.body.password,
       registrationDate: new Date(),
     });
 
