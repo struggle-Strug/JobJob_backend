@@ -308,24 +308,24 @@ exports.updateJobPostStatus = async (req, res) => {
     if (req.params.status === "allowed") {
       const msg = {
         to: customer.email,
-        from: "huskar020911@gmail.com", // Must be a verified sender on SendGrid
-        subject: "施設審査結果",
-        text: `差出人：ジョブジョブ運営事務局
-FROM：noreply@jobjob-jp.com
-件名：［ジョブジョブ］施設申請の審査結果
+        from: {
+          email: "noreply@jobjob-jp.com", // Using the verified email that works in your other controller
+          name: "ジョブジョブ運営事務局",
+        }, // Must be a verified sender on SendGrid
+        subject: "［ジョブジョブ］求人申請の審査結果",
+        text: `
+この度はジョブジョブへの求人申請をいただき誠にありがとうございます。
 
-この度はジョブジョブへの施設情報を登録いただき誠にありがとうございます。
-
-対象施設：${facility.name}。
-職種：${jobPost.type}。
-タイトル：${jobPost.sub_title}。
+対象施設：${facility.name}
+職種：${jobPost.type}
+タイトル：${jobPost.sub_title}
 
 ジョブジョブ運営事務局にて内容確認のうえ掲載を開始致しました。
 掲載ページはこちらからご確認ください。
 施設ページのURLが入ります。
 
 こちらの施設での求人掲載は、下記よりログインのうえ求人登録をお願いします。
-http://staging.jobjob-jp.com/customers/sign_in
+https://staging.jobjob-jp.com/customers/sign_in
 
 本メールの送信アドレスは送信専用です。
 本メールに直接ご返信いただいてもご対応できかねますので、ご注意願います。
@@ -336,22 +336,19 @@ http://staging.jobjob-jp.com/customers/sign_in
 【お問い合わせ先】
 ジョブジョブ運営事務局
 お問い合わせフォーム
-http://staging.jobjob-jp.com/customers/contact/
+https://staging.jobjob-jp.com/customers/contact/
 ----------------------------------------------------------------------
 `,
         html: `
-        <p>差出人：ジョブジョブ運営事務局</p>
-        <p>FROM：noreply@jobjob-jp.com</p>
-        <p>件名：［ジョブジョブ］施設申請の審査結果</p>
-        <p>この度はジョブジョブへの施設情報を登録いただき誠にありがとうございます。</p>
-        <p>対象施設：<strong>${facility.name}</strong>。</p>
-        <p>職種：<strong>${jobPost.type}</strong>。</p>
-        <p>タイトル：<strong>${jobPost.sub_title}</strong>。</p>
+        <p>この度はジョブジョブへの求人申請をいただき誠にありがとうございます。</p>
+        <p>対象施設：<strong>${facility.name}</strong></p>
+        <p>職種：<strong>${jobPost.type}</strong></p>
+        <p>タイトル：<strong>${jobPost.sub_title}</strong></p>
         <p>ジョブジョブ運営事務局にて内容確認のうえ掲載を開始致しました。</p>
         <p>掲載ページはこちらからご確認ください。</p>
         <p>施設ページのURLが入ります。</p>
         <p>こちらの施設での求人掲載は、下記よりログインのうえ求人登録をお願いします。</p>
-        <p><a href="http://staging.jobjob-jp.com/customers/sign_in" target="_blank">http://staging.jobjob-jp.com/customers/sign_in</a></p>
+        <p><a href="https://staging.jobjob-jp.com/customers/sign_in" target="_blank">https://staging.jobjob-jp.com/customers/sign_in</a></p>
         <br/>
         <p>本メールの送信アドレスは送信専用です。</p>
         <p>本メールに直接ご返信いただいてもご対応できかねますので、ご注意願います。</p>
@@ -361,28 +358,28 @@ http://staging.jobjob-jp.com/customers/contact/
         <p><strong>【お問い合わせ先】</strong></p>
         <p>ジョブジョブ運営事務局</p>
         <p>お問い合わせフォーム</p>
-        <p><a href="http://staging.jobjob-jp.com/customers/contact/" target="_blank">http://staging.jobjob-jp.com/customers/contact/</a></p>`,
+        <p><a href="https://staging.jobjob-jp.com/customers/contact/" target="_blank">https://staging.jobjob-jp.com/customers/contact/</a></p>`,
       };
 
       await sgMail.send(msg);
     } else if (req.params.status === "draft") {
       const msg = {
         to: customer.email,
-        from: "huskar020911@gmail.com", // Must be a verified sender on SendGrid
-        subject: "施設審査結果",
-        text: `差出人：ジョブジョブ運営事務局
-      FROM：noreply@jobjob-jp.com
-      件名：［ジョブジョブ］施設申請の審査結果
-      
-      この度はジョブジョブへの施設情報を登録いただき誠にありがとうございます。
-      
-      対象施設：${facility.name}。
-      職種：${jobPost.type}。
-      タイトル：${jobPost.sub_title}。
-      
+        from: {
+          email: "noreply@jobjob-jp.com", // Using the verified email that works in your other controller
+          name: "ジョブジョブ運営事務局",
+        }, // Must be a verified sender on SendGrid
+        subject: "［ジョブジョブ］求人申請の審査結果",
+        text: `
+      この度はジョブジョブへの求人申請をいただき誠にありがとうございます。
+
+      対象施設：${facility.name}
+      職種：${jobPost.type}
+      タイトル：${jobPost.sub_title}
+
       ジョブジョブ運営事務局にて内容確認させていただいたところ、不適切な表現や情報が含まれておりますため差し戻しとさせていただきます。
       お手数ですが、下記よりログインのうえ施設情報を修正いただき再度申請をお願いします。
-      http://staging.jobjob-jp.com/customers/sign_in
+      https://staging.jobjob-jp.com/customers/sign_in
       
       
       本メールの送信アドレスは送信専用です。
@@ -394,20 +391,17 @@ http://staging.jobjob-jp.com/customers/contact/
       【お問い合わせ先】
       ジョブジョブ運営事務局
       お問い合わせフォーム
-      http://staging.jobjob-jp.com/customers/contact/
+      https://staging.jobjob-jp.com/customers/contact/
       ----------------------------------------------------------------------
       `,
         html: `
-              <p>差出人：ジョブジョブ運営事務局</p>
-              <p>FROM：noreply@jobjob-jp.com</p>
-              <p>件名：［ジョブジョブ］施設申請の審査結果</p>
-              <p>この度はジョブジョブへの施設情報を登録いただき誠にありがとうございます。</p>
-              <p>対象施設：<strong>${facility.name}</strong>。</p>
-              <p>職種：<strong>${jobPost.type}</strong>。</p>
-              <p>タイトル：<strong>${jobPost.sub_title}</strong>。</p>
+              <p>この度はジョブジョブへの求人申請をいただき誠にありがとうございます。</p>
+              <p>対象施設：<strong>${facility.name}</strong></p>
+              <p>職種：<strong>${jobPost.type}</strong></p>
+              <p>タイトル：<strong>${jobPost.sub_title}</strong></p>
               <p>ジョブジョブ運営事務局にて内容確認させていただいたところ、不適切な表現や情報が含まれておりますため差し戻しとさせていただきます。</p>
               <p>お手数ですが、下記よりログインのうえ施設情報を修正いただき再度申請をお願いします。</p>
-              <p><a href="http://staging.jobjob-jp.com/customers/sign_in" target="_blank">http://staging.jobjob-jp.com/customers/sign_in</a></p>
+              <p><a href="https://staging.jobjob-jp.com/customers/sign_in" target="_blank">https://staging.jobjob-jp.com/customers/sign_in</a></p>
               <br/>
               <p>本メールの送信アドレスは送信専用です。</p>
               <p>本メールに直接ご返信いただいてもご対応できかねますので、ご注意願います。</p>
@@ -417,7 +411,7 @@ http://staging.jobjob-jp.com/customers/contact/
               <p><strong>【お問い合わせ先】</strong></p>
               <p>ジョブジョブ運営事務局</p>
               <p>お問い合わせフォーム</p>
-              <p><a href="http://staging.jobjob-jp.com/customers/contact/" target="_blank">http://staging.jobjob-jp.com/customers/contact/</a></p>`,
+              <p><a href="https://staging.jobjob-jp.com/customers/contact/" target="_blank">https://staging.jobjob-jp.com/customers/contact/</a></p>`,
       };
 
       await sgMail.send(msg);
