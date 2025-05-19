@@ -38,7 +38,10 @@ exports.signup = async (req, res) => {
     await newCustomer.save();
     const msg = {
       to: req.body.email,
-      from: "huskar020911@gmail.com", // Must be a verified sender on SendGrid
+      from: {
+        email: "noreply@jobjob-jp.com", // Using the verified email that works in your other controller
+        name: "ジョブジョブ運営事務局",
+      }, // Must be a verified sender on SendGrid
       subject: "［ジョブジョブ］パスワードのご案内",
       text: `送信元：JobJob - ジョブジョブ
     タイトル：［ジョブジョブ］パスワードのご案内
@@ -49,7 +52,7 @@ exports.signup = async (req, res) => {
     パスワード：${initalPassword}
     
     下記よりログインのうえ施設情報、求人情報を入稿してください。
-    http://142.132.202.228:3000/customers/sign_in
+    http://staging.jobjob-jp.com/customers/sign_in
     
     本メールの送信アドレスは送信専用です。
     本メールに直接ご返信いただいてもご対応できかねますので、ご注意願います。
@@ -60,7 +63,7 @@ exports.signup = async (req, res) => {
     【お問い合わせ先】
     ジョブジョブ運営事務局
     お問い合わせフォーム
-    http://142.132.202.228:3000/customers/contact/`,
+    http://staging.jobjob-jp.com/customers/contact/`,
 
       html: `
         <p>送信元：JobJob - ジョブジョブ</p>
@@ -68,7 +71,7 @@ exports.signup = async (req, res) => {
         <p>管理画面ご利用のためのパスワードを発行しました。</p>
         <p><strong>パスワード：${initalPassword}</strong></p>
         <p>下記よりログインのうえ施設情報、求人情報を入稿してください。</p>
-        <p><a href="http://142.132.202.228:3000/customers/sign_in" target="_blank">http://142.132.202.228:3000/customers/sign_in</a></p>
+        <p><a href="http://staging.jobjob-jp.com/customers/sign_in" target="_blank">http://staging.jobjob-jp.com/customers/sign_in</a></p>
         <br/>
         <p>本メールの送信アドレスは送信専用です。</p>
         <p>本メールに直接ご返信いただいてもご対応できかねますので、ご注意願います。</p>
@@ -78,7 +81,7 @@ exports.signup = async (req, res) => {
         <p><strong>【お問い合わせ先】</strong></p>
         <p>ジョブジョブ運営事務局</p>
         <p>お問い合わせフォーム</p>
-        <p><a href="http://142.132.202.228:3000/customers/contact/" target="_blank">http://142.132.202.228:3000/customers/contact/</a></p>
+        <p><a href="http://staging.jobjob-jp.com/customers/contact/" target="_blank">http://staging.jobjob-jp.com/customers/contact/</a></p>
       `,
     };
 
