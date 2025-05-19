@@ -35,7 +35,7 @@ exports.register = async (req, res) => {
     パスワード：${req.body.password}。
     
     求人検索はこちら
-    http://staging.jobjob-jp.com/
+    http://staging.jobjob-jp.com/members/register_complete
     マイページはこちら
     http://staging.jobjob-jp.com/members/mypage
     
@@ -243,7 +243,7 @@ exports.forgotPasswordRequest = async (req, res) => {
     }
     // トークン生成（例：1時間有効）
     const token = jwt.sign({ id: user._id }, process.env.SECRET, {
-      expiresIn: "1h",
+      expiresIn: "24h",
     });
 
     // SendGrid の API キーをセット
