@@ -267,7 +267,7 @@ exports.updateFacilityStatus = async (req, res) => {
       const msg = {
         to: customer.email,
         from: {
-          email: "huskar020911@gmail.com", // Verified sender
+          email: "noreply@jobjob-jp.com", // Verified sender
           name: "ジョブジョブ運営事務局",
         },
         subject: "[ジョブジョブ] 施設申請の審査結果",
@@ -293,13 +293,12 @@ exports.updateFacilityStatus = async (req, res) => {
           <p>対象施設：<strong>${facility.name}</strong></p>
           <p>ジョブジョブ運営事務局にて内容確認のうえ掲載を開始致しました。</p>
           <p>掲載ページはこちらからご確認ください：<br/>
-          <a href="http://staging.jobjob-jp.com/facility/${req.params.id}" target="_blank">施設詳細ページ</a></p>
+          <a href="https://staging.jobjob-jp.com/facility/${req.params.id}" target="_blank">"https://staging.jobjob-jp.com/facility/${req.params.id}"</a></p>
           <p>求人掲載は以下よりログインしてください：<br/>
-          <a href="http://staging.jobjob-jp.com/customers/sign_in" target="_blank">ログインページ</a></p>
-          <br/>
+          <a href="https://staging.jobjob-jp.com/customers/sign_in" target="_blank">"https://staging.jobjob-jp.com/customers/sign_in"</a></p>
           <p>※このメールは送信専用です。ご返信いただいても対応できかねますのでご了承ください。</p>
           <p>お問い合わせは以下フォームよりお願いいたします。<br/>
-          <a href="http://staging.jobjob-jp.com/customers/contact/" target="_blank">お問い合わせフォーム</a></p>
+          <a href="https://staging.jobjob-jp.com/customers/contact/" target="_blank">"https://staging.jobjob-jp.com/customers/contact/"</a></p>
         `,
       };
 
@@ -308,7 +307,7 @@ exports.updateFacilityStatus = async (req, res) => {
       const msg = {
         to: customer.email,
         from: {
-          email: "huskar020911@gmail.com",
+          email: "noreply@jobjob-jp.com",
           name: "ジョブジョブ運営事務局",
         }, // Must be a verified sender on SendGrid
         subject: "[ジョブジョブ] 施設申請の審査結果",
@@ -318,7 +317,7 @@ exports.updateFacilityStatus = async (req, res) => {
 
 ジョブジョブ運営事務局にて内容確認させていただいたところ、不適切な表現や情報が含まれておりますため差し戻しとさせていただきます。
 お手数ですが、下記よりログインのうえ施設情報を修正いただき再度申請をお願いします。
-http://staging.jobjob-jp.com/customers/sign_in
+https://staging.jobjob-jp.com/customers/sign_in
 
 
 本メールの送信アドレスは送信専用です。
@@ -338,17 +337,16 @@ http://staging.jobjob-jp.com/customers/contact/
         <p>対象施設：<strong>${facility.name}</strong></p>
         <p>ジョブジョブ運営事務局にて内容確認させていただいたところ、不適切な表現や情報が含まれておりますため差し戻しとさせていただきます。</p>
         <p>お手数ですが、下記よりログインのうえ施設情報を修正いただき再度申請をお願いします。</p>
-        <p><a href="http://staging.jobjob-jp.com/customers/sign_in" target="_blank">http://staging.jobjob-jp.com/customers/sign_in</a></p>
+        <p><a href="https://staging.jobjob-jp.com/customers/sign_in" target="_blank">https://staging.jobjob-jp.com/customers/sign_in</a></p>
         <br/>
         <p>本メールの送信アドレスは送信専用です。</p>
         <p>本メールに直接ご返信いただいてもご対応できかねますので、ご注意願います。</p>
-        <br/>
-        <p>当メールに関するお問い合わせについては下記へご連絡ください。</p>
+        <p>※当メールに関するお問い合わせについては下記へご連絡ください。</p>
         <hr>
         <p><strong>【お問い合わせ先】</strong></p>
         <p>ジョブジョブ運営事務局</p>
         <p>お問い合わせフォーム</p>
-        <p><a href="http://staging.jobjob-jp.com/customers/contact/" target="_blank">http://staging.jobjob-jp.com/customers/contact/</a></p>`,
+        <p><a href="https://staging.jobjob-jp.com/customers/contact/" target="_blank">https://staging.jobjob-jp.com/customers/contact/</a></p>`,
       };
 
       await sgMail.send(msg);
