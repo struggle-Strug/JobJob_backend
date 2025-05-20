@@ -176,52 +176,68 @@ exports.getJobPostById = async (req, res) => {
 
 exports.getJobPostByUserById = async (req, res) => {
   try {
+    // Fetch the job post based on jobpost_id
     const jobPost = await JobPostModel.findOne({ jobpost_id: req.params.id });
+
     if (!jobPost) {
       return res
         .status(404)
         .json({ message: "Job post not found", error: true });
     }
 
+    // Check if the job post is allowed
     if (jobPost.allowed !== "allowed") {
       return res.json({
         message: "この求人は承認されていない求人です。",
       });
     }
 
-    // Fetch customer and facility details
+    // Fetch customer and facility details related to the job post
     const customer = await customerModel.findOne({
       customer_id: jobPost.customer_id,
     });
+
     const facility = await facilityModel.findOne({
       facility_id: jobPost.facility_id,
     });
 
+    // Fetch customer pictures
     const customerPictures = await PhotoModel.findOne({
       customer_id: jobPost.customer_id,
-    }).lean();
+    }).lean(); // Convert to plain object to make it easier to handle
 
+    // Handle the scenario when customerPictures doesn't exist or has no 'images'
     const pictures = jobPost.picture.map((picture) => {
-      const pictureWithDescription = customerPictures.images.find(
-        (customerPicture) => customerPicture.photoUrl === picture
-      );
+      // Check if customerPictures exists and contains images
+      if (customerPictures && customerPictures.images) {
+        const pictureWithDescription = customerPictures.images.find(
+          (customerPicture) => customerPicture.photoUrl === picture
+        );
+        return {
+          url: picture,
+          description: pictureWithDescription
+            ? pictureWithDescription.description
+            : "",
+        };
+      }
       return {
         url: picture,
-        description: pictureWithDescription
-          ? pictureWithDescription.description
-          : "",
+        description: "", // No description if no customerPictures or images
       };
     });
 
+    // Create the response data with additional details
     const jobPostWithDetails = {
       ...jobPost.toObject(), // Convert MongoDB document to a plain object
       customer_id: customer, // Include customer data
       facility_id: facility, // Include facility data
-      picture: pictures,
+      picture: pictures, // Include pictures data
     };
 
+    // Return the job post with all details
     res.status(200).json({ jobpost: jobPostWithDetails });
   } catch (error) {
+    // Log the error and return a 500 status code for server error
     console.error("Error fetching job post by ID:", error);
     res.status(500).json({ message: "サーバーエラー", error: true });
   }
