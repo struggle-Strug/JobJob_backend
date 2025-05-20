@@ -55,7 +55,6 @@ exports.register = async (req, res) => {
     <p style="margin: 5px 0; line-height: 1.2;">この度はジョブジョブに会員登録いただき誠にありがとうございます。</p>
     <br/>
     <p style="margin: 5px 0; line-height: 1.2;">ID：<strong>ご登録のメールアドレス</strong></p>
-    <br/>
     <p style="margin: 5px 0; line-height: 1.2;">パスワード：<strong>ご登録時に設定いただいたパスワード</strong></p>
     <br/>
     <p style="margin: 5px 0; line-height: 1.2;">求人検索はこちら</p>
