@@ -376,7 +376,7 @@ exports.getByStatus = async (req, res) => {
     // ✅ Fetch messages for user
     const messages = await MessageModel.find({
       $or: [{ first: id }, { second: id }],
-    });
+    }).sort({ updated_at: -1 });
 
     // ✅ Fix status filtering
     let filteredMessages;
