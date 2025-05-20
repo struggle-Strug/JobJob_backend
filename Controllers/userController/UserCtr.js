@@ -66,7 +66,6 @@ exports.register = async (req, res) => {
     <p style="margin: 5px 0; line-height: 1.2;">本メールに直接ご返信いただいてもご対応できかねますので、ご注意願います。</p>
     <br/>
     <p style="margin: 5px 0; line-height: 1.2;">当メールに関するお問い合わせについては下記へご連絡ください。</p>
-    <hr style="margin: 10px 0;"/>
     <p style="margin: 5px 0; line-height: 1.2;"><strong>----------------------------------------------------------------------
 </strong></p>
     <p style="margin: 5px 0; line-height: 1.2;"><strong>【お問い合わせ先】</strong></p>
