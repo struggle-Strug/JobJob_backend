@@ -149,7 +149,7 @@ exports.getMine = async (req, res) => {
     const id = req.params.id;
     const messages = await MessageModel.find({
       $or: [{ first: id }, { second: id }],
-    });
+    }).sort({ updated_at: -1 });
 
     const messageWithDetails = await Promise.all(
       messages.map(async (message) => {
@@ -258,6 +258,7 @@ exports.send = async (req, res) => {
       recevier: recevier,
       files: files,
       message: message,
+      updated_at: new Date(),
     };
     await messages.content.push(newMessage);
     await messages.save().then((message) => {
