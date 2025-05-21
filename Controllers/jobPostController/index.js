@@ -573,7 +573,7 @@ exports.getAppliedJobPosts = async (req, res) => {
   try {
     // Get all messages where the user is either first or second
     const myMessages = await MessageModel.find({
-      $or: [{ first: req.user.data._id }, { second: req.user.data._id }],
+      first: req.user.data._id,
       status: "応募済", // Filter directly in the DB instead of `.filter()`
     });
     // Extract jobPost IDs to fetch all at once
