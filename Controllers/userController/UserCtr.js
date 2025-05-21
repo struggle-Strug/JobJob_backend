@@ -133,17 +133,21 @@ exports.tokenlogin = async (req, res) => {
 
 exports.update = async (req, res) => {
   try {
+    console.log("req.body", req.body);
     const user = await User.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
     });
 
-    if (req.body.qualification.length > 0) {
+    if (req.body.qualification?.length > 0) {
       user.qualification = req.body.qualification;
     }
+
+    console.log("user", user);
 
     await user.save();
     return res.status(200).json({ message: "更新成功!", user: user });
   } catch (error) {
+    console.log("error", error);
     return res.status(500).json({ message: "サーバーエラー", error: true });
   }
 };

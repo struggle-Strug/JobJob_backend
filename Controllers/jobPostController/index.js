@@ -521,6 +521,7 @@ exports.getFilteredJobPosts = async (req, res) => {
             ...jobpost.rest_type,
             ...jobpost.work_time_type,
             ...jobpost.education_content,
+            ...jobpost.qualification_other,
           ];
           return filters.feature.some((f) => jobPostFeatures.includes(f)); // Filter if feature_1 matches
         }
