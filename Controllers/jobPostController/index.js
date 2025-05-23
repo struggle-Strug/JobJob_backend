@@ -442,6 +442,7 @@ exports.getFavourites = async (req, res) => {
   try {
     const jobPosts = await JobPostModel.find({
       jobpost_id: { $in: req.body.data },
+      allowed: "allowed",
     });
     // Resolve customer and facility data
     const jobPostsWithDetails = await Promise.all(
@@ -485,6 +486,7 @@ exports.getFilteredJobPosts = async (req, res) => {
       })
     );
 
+    console.log("filter", jobPosts.length);
     const filteredJobPosts = jobPostsWithDetails
       .filter((jobpost) => jobpost.allowed === "allowed")
       .filter((jobpost) => jobpost.type === filters.JobType) // Filter by job type

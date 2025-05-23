@@ -5,7 +5,10 @@ const sgMail = require("@sendgrid/mail");
 exports.register = async (req, res) => {
   try {
     const user = await User.findOne({ email: req.body.email });
-    console.log("REGISTER SENDGRID_API_KEY:", process.env.SENDGRID_API_KEY?.slice(0,4) + "…");
+    console.log(
+      "REGISTER SENDGRID_API_KEY:",
+      process.env.SENDGRID_API_KEY?.slice(0, 4) + "…"
+    );
     // Set your SendGrid API key
     sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
@@ -28,7 +31,8 @@ exports.register = async (req, res) => {
         name: "ジョブジョブ運営事務局",
       },
       subject: "［ジョブジョブ］新規会員登録完了のお知らせ",
-      text: [`
+      text: [
+        `
     この度はジョブジョブに会員登録いただき誠にありがとうございます。
     
     ID：${req.body.email}。
@@ -50,7 +54,8 @@ exports.register = async (req, res) => {
     お問い合わせフォーム
     http://staging.jobjob-jp.com/customers/contact/
     ----------------------------------------------------------------------
-    `].join("\n"),
+    `,
+      ].join("\n"),
       html: `
     <p style="margin: 5px 0; line-height: 1.2;">この度はジョブジョブに会員登録いただき誠にありがとうございます。</p>
     <br/>
@@ -166,15 +171,17 @@ exports.updateWork = async (req, res) => {
 exports.updateDesire = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
-    user.jobType = req.body.jobTypes;
-    user.desirePrefecture = req.body.prefectures;
-    user.employmentType = req.body.employmentType;
-    user.employmentDate = req.body.employmentDate;
-    user.desireYearSalary = req.body.yearSalary;
-    user.feature = req.body.asks;
+    console.log(req.body);
+    user.jobType = req.body?.jobTypes || [];
+    user.desirePrefecture = req.body?.prefectures || [];
+    user.employmentType = req.body?.employmentType || [];
+    user.employmentDate = req.body?.employmentDate || "";
+    user.desireYearSalary = req.body?.yearSalary || "";
+    user.feature = req.body?.asks || [];
     await user.save();
     return res.status(200).json({ message: "更新成功!", user: user });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({ message: "サーバーエラー", error: true });
   }
 };
@@ -257,7 +264,9 @@ exports.forgotPasswordRequest = async (req, res) => {
         name: "ジョブジョブ運営事務局",
       },
       subject: "パスワードリセットのご案内",
-      text: [`以下のリンクからパスワードリセットを行ってください:\n\nhttp://staging.jobjob-jp.com/reset-password?token=${token}`].join("\n"),
+      text: [
+        `以下のリンクからパスワードリセットを行ってください:\n\nhttp://staging.jobjob-jp.com/reset-password?token=${token}`,
+      ].join("\n"),
       html: `<p style="margin: 5px 0; line-height: 1.2;">以下のリンクからパスワードリセットを行ってください:</p>
              <p style="margin: 5px 0; line-height: 1.2;"><a href="http://staging.jobjob-jp.com/reset-password?token=${token}" target="_blank">パスワードリセット</a></p>`,
     };
@@ -266,9 +275,10 @@ exports.forgotPasswordRequest = async (req, res) => {
       .status(200)
       .json({ message: "パスワードリセット用のメールを送信しました" });
   } catch (emailError) {
-    return res
-      .status(500)
-      .json({ message: "メール送信に失敗しました", error: emailError.response.body });
+    return res.status(500).json({
+      message: "メール送信に失敗しました",
+      error: emailError.response.body,
+    });
   }
 };
 
